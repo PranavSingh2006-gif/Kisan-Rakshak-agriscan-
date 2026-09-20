@@ -1,5 +1,8 @@
 # Kisan-Rakshak-agriscan-
-Kisan Rakshak (AgriScan) :--  AI-powered crop pathology diagnostic platform with progressive disease tracking, smart irrigation scheduling, and adaptive treatment recommendations.
+
+> **Kisan Rakshak (AgriScan):** AI-powered crop pathology diagnostic platform with progressive disease tracking, smart irrigation scheduling, and adaptive treatment recommendations.
+
+---
 
 # Kisan Rakshak (AgriScan) Project
 
@@ -52,4 +55,3 @@ npm run dev:backend
 # Build frontend for production
 npm run build:frontend
 ```
-

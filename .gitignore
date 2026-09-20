@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules/
+*/node_modules/
+agriscan-frontend/node_modules/
+agriscan-backend/node_modules/
+
+# Production build outputs
+dist/
+dist-ssr/
+*.local
+agriscan-frontend/dist/
+
+# Environment files with secrets
+.env
+.env*.local
+*.env
+agriscan-backend/.env
+agriscan-frontend/.env
+
+# Editor & OS files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Temporary test outputs
+test_*.cjs
+*_screenshot.png

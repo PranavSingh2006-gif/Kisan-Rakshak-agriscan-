@@ -1,0 +1,96 @@
+export const regionalOutbreakData = {
+  regionName: 'Greenfield Valley Agricultural District',
+  activeAlertsCount: 3,
+  windVector: {
+    speedKmH: 14,
+    directionName: 'East-North-East',
+    driftAngleDeg: 245 // angle toward which spores blow
+  },
+  farms: [
+    {
+      id: 'your-farm',
+      name: 'Your Farm (Plot #4)',
+      isUser: true,
+      distanceKm: 0,
+      crop: 'Potato & Tomato',
+      status: 'MONITORING',
+      severity: 'Moderate',
+      statusColor: 'bg-amber-500 text-white',
+      xPercent: 48,
+      yPercent: 45,
+      lastScan: 'Today, 09:30 AM',
+      activeDisease: 'Early Blight (Alternaria solani)',
+      advice: 'Implement progressive tracking. Monitor neighboring Oakridge spore drift.'
+    },
+    {
+      id: 'farm-1',
+      name: 'Oakridge Organic Orchards',
+      isUser: false,
+      distanceKm: 3.2,
+      direction: 'East',
+      crop: 'Potato & Tomato',
+      status: 'CONTAGIOUS_OUTBREAK',
+      severity: 'Critical',
+      statusColor: 'bg-red-500 text-white',
+      xPercent: 72,
+      yPercent: 38,
+      lastScan: 'Yesterday, 16:00 PM',
+      activeDisease: 'Late Blight (Phytophthora infestans)',
+      affectedAcres: 18,
+      advice: 'Active contagion! High risk of wind-carried sporangia within 5 km radius.'
+    },
+    {
+      id: 'farm-2',
+      name: 'Sunny Slope Vineyards',
+      isUser: false,
+      distanceKm: 6.8,
+      direction: 'North-East',
+      crop: 'Grapes & Corn',
+      status: 'WARNING',
+      severity: 'Moderate',
+      statusColor: 'bg-amber-500 text-white',
+      xPercent: 65,
+      yPercent: 18,
+      lastScan: '2 days ago',
+      activeDisease: 'Common Rust & Powdery Mildew',
+      affectedAcres: 8,
+      advice: 'Downwind drift detected. Preventive bio-fungicide barrier recommended.'
+    },
+    {
+      id: 'farm-3',
+      name: 'Meadowbrook Grains',
+      isUser: false,
+      distanceKm: 11.5,
+      direction: 'West',
+      crop: 'Wheat & Barley',
+      status: 'HEALTHY_BUFFER',
+      severity: 'Low',
+      statusColor: 'bg-emerald-500 text-white',
+      xPercent: 22,
+      yPercent: 62,
+      lastScan: 'Today, 08:15 AM',
+      activeDisease: 'None Detected',
+      affectedAcres: 0,
+      advice: 'Buffer zone intact. Upwind from active contagion zones.'
+    },
+    {
+      id: 'farm-4',
+      name: 'Riverdale Organic Veggies',
+      isUser: false,
+      distanceKm: 14.2,
+      direction: 'South-East',
+      crop: 'Bell Peppers & Tomato',
+      status: 'CONTAGIOUS_OUTBREAK',
+      severity: 'Severe',
+      statusColor: 'bg-red-500 text-white',
+      xPercent: 80,
+      yPercent: 78,
+      lastScan: '3 days ago',
+      activeDisease: 'Bacterial Spot (Xanthomonas)',
+      affectedAcres: 12,
+      advice: 'Containment perimeter erected. Avoid sharing harvesting machinery.'
+    }
+  ],
+  surveillanceNotice: 'REGIONAL ALERT: Phytophthora late blight spores detected 3.2 km upwind. Farmers within 8 km are advised to apply rainfast protective contact fungicides prior to evening rain.'
+};
+
