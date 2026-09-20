@@ -57,7 +57,6 @@ function parseGeminiJson(text) {
   }
 }
 
-import { UNIFIED_CROP_DISEASE_DATASET, matchAgainstUnifiedDataset } from './src/data/unifiedCropDiseaseDataset.js';
 import { UNIFIED_CROP_DISEASE_DATASET, matchAgainstUnifiedDataset } from './data/unifiedCropDiseaseDataset.js';
 
 // Diagnose endpoint
