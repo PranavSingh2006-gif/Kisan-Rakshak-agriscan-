@@ -11,7 +11,7 @@ The project is structured into two completely independent, standalone modules:
 ```
 HackDevenger/
 ├── agriscan-frontend/     # React + Vite + Tailwind CSS User Interface
-├── agriscan-backend/      # Node.js + Express + Gemini AI Pathology Engine
+├── agriscan-backend/      # Node.js + Nest.js + Gemini AI Pathology Engine
 └── package.json           # Workspace helper scripts
 ```
 
