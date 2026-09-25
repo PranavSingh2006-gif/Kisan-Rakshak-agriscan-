@@ -2,70 +2,46 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   X, Upload, CheckCircle2, AlertTriangle, ShieldCheck, Leaf, RefreshCw,
   Sparkles, ChevronDown, Check, ShieldAlert, Info, CloudSun,
-  Camera, Video, VideoOff, Circle, FlipHorizontal, SwitchCamera,
-  Calendar, MapPin, Plus, Layers
+  Camera, Video, VideoOff, Circle, FlipHorizontal, SwitchCamera
 } from 'lucide-react';
 import { cropDatabase } from '../../data/cropData';
 import { getAllPlotHistories, getPlotHistory, appendScanToHistory, evaluateFollowUpOutcome } from '../../data/progressiveScanHistory';
 
-const KNOWN_CROPS = {
-  potato: { id: 'potato', name: 'Potato (आलू)', icon: '🥔' },
-  tomato: { id: 'tomato', name: 'Tomato (टमाटर)', icon: '🍅' },
-  wheat: { id: 'wheat', name: 'Wheat (गेहूं)', icon: '🌾' },
-  rice: { id: 'rice', name: 'Rice / Paddy (धान)', icon: '🌾' },
-  paddy: { id: 'rice', name: 'Rice / Paddy (धान)', icon: '🌾' },
-  corn: { id: 'corn', name: 'Corn / Maize (मक्का)', icon: '🌽' },
-  maize: { id: 'corn', name: 'Corn / Maize (मक्का)', icon: '🌽' },
-  cotton: { id: 'cotton', name: 'Cotton (कपास)', icon: '🌱' },
-  sugarcane: { id: 'sugarcane', name: 'Sugarcane (गन्ना)', icon: '🎋' },
-  mustard: { id: 'mustard', name: 'Mustard (सरसों)', icon: '🌼' },
-  soybean: { id: 'soybean', name: 'Soybean (सोयाबीन)', icon: '🌿' },
-  chilli: { id: 'chilli', name: 'Chilli / Pepper (मिर्च)', icon: '🌶️' },
-  pepper: { id: 'chilli', name: 'Chilli / Pepper (मिर्च)', icon: '🌶️' },
-  onion: { id: 'onion', name: 'Onion (प्याज)', icon: '🧅' },
-  apple: { id: 'apple', name: 'Apple (सेब)', icon: '🍏' },
-  grape: { id: 'grape', name: 'Grape (अंगूर)', icon: '🍇' },
-};
+const CROP_OPTIONS = [
+  { id: 'tomato', name: 'Tomato', icon: '🍅' },
+  { id: 'potato', name: 'Potato', icon: '🥔' },
+  { id: 'corn', name: 'Corn (Maize)', icon: '🌽' },
+  { id: 'apple', name: 'Apple', icon: '🍏' },
+  { id: 'wheat', name: 'Wheat', icon: '🌾' },
+  { id: 'grape', name: 'Grape', icon: '🍇' },
+  { id: 'bell-pepper', name: 'Bell Pepper', icon: '🫑' },
+  { id: 'onion', name: 'Onion', icon: '🧅' },
+  { id: 'soybean', name: 'Soybean', icon: '🌿' },
+  { id: 'strawberry', name: 'Strawberry', icon: '🍓' },
+];
 
-function resolveCropDisplay(selectedCrop, diagnosisResult) {
-  if (selectedCrop && selectedCrop.name && selectedCrop.name !== 'Unknown') {
-    return selectedCrop;
-  }
-  if (diagnosisResult) {
-    if (diagnosisResult.cropName && diagnosisResult.cropName !== 'Unknown') {
-      const match = Object.values(KNOWN_CROPS).find(k =>
-        diagnosisResult.cropName.toLowerCase().includes(k.id) ||
-        k.name.toLowerCase().includes(diagnosisResult.cropName.toLowerCase())
-      );
-      if (match) return match;
-      return { name: diagnosisResult.cropName, icon: '🌱' };
-    }
-    const txt = `${diagnosisResult.diseaseName || ''} ${diagnosisResult.pathogen || ''} ${diagnosisResult.simpleExplanation || ''}`.toLowerCase();
-    for (const [key, k] of Object.entries(KNOWN_CROPS)) {
-      if (txt.includes(key)) {
-        return k;
-      }
-    }
-    if (diagnosisResult.scientificCropName) {
-      return { name: diagnosisResult.scientificCropName, icon: '🌿' };
-    }
-  }
-  return { name: 'Agricultural Crop (कृषि फसल)', icon: '🌱' };
-}
+const STAGE_OPTIONS = [
+  { id: 'seedling', name: 'Seedling', icon: '🌱' },
+  { id: 'vegetative', name: 'Vegetative', icon: '🌿' },
+  { id: 'flowering', name: 'Flowering', icon: '🌸' },
+  { id: 'fruiting', name: 'Fruiting', icon: '🍅' },
+  { id: 'mature', name: 'Mature / Harvest', icon: '🌾' },
+  { id: 'post-harvest', name: 'Post-Harvest', icon: '🍂' },
+];
 
 function ScanFormFields({
+  selectedCrop, selectedStage,
   scanDate, setScanDate,
-  linkedPlotId, handleSelectPlot, previousScan, plotDisplayName,
-  isAutoDetecting, autoDetectStatus, autoDetectResult,
-  selectedCrop, selectedStage
+  linkedPlotId, handleSelectPlot, previousScan,
+  isAutoDetecting
 }) {
   return (
     <div className="space-y-3">
-      {/* 1. Field Location Section: Link to Monitored Plot */}
-      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/90 space-y-2">
+      {/* Field Location: Link to Monitored Plot */}
+      <div className="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100/90 space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-[11px] font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-[#257038]" />
+          <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+            <RefreshCw className="w-3.5 h-3.5 text-[#257038]" />
             <span>Field Location / Monitored Plot</span>
           </label>
           {previousScan && (
@@ -74,40 +50,42 @@ function ScanFormFields({
             </span>
           )}
         </div>
-
         <select
           value={linkedPlotId || ''}
           onChange={(e) => handleSelectPlot && handleSelectPlot(e.target.value)}
-          className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038] shadow-2xs"
+          className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038]"
         >
           <option value="">Unmapped / Standalone New Scan</option>
-          <option value="wheat-field-a">Field A (Wheat • 2.4 acres) — Monitored Plot</option>
-          <option value="soybean-field-b">Field B (Soybean • 3.1 acres) — Monitored Plot</option>
-          <option value="tomato-field-c">Field C (Tomato • 1.2 acres) — Monitored Plot</option>
-          <option value="maize-field-d">Field D (Maize • 2.0 acres) — Monitored Plot</option>
+          <option value="wheat-field-a">Field A (Wheat � 2.4 acres) � Monitored Plot</option>
+          <option value="soybean-field-b">Field B (Soybean � 3.1 acres) � Monitored Plot</option>
+          <option value="tomato-field-c">Field C (Tomato � 1.2 acres) � Monitored Plot</option>
+          <option value="maize-field-d">Field D (Maize � 2.0 acres) � Monitored Plot</option>
         </select>
-
-        {/* If linked to monitored plot, field is the same and confirmed */}
         {linkedPlotId ? (
-          <div className="p-2 rounded-xl bg-white border border-emerald-200 text-xs text-emerald-950 space-y-1">
-            <div className="flex items-center gap-1.5 font-bold text-[#154624]">
+          <div className="p-2 rounded-xl bg-white border border-emerald-200 text-xs text-emerald-950 space-y-0.5">
+            <p className="font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#257038]" />
-              <span>Field Location: {plotDisplayName} (Linked Monitored Plot)</span>
-            </div>
+              <span>Field: {
+                linkedPlotId === 'wheat-field-a' ? 'Field A - 2.4 acres (Wheat)' :
+                linkedPlotId === 'soybean-field-b' ? 'Field B - 3.1 acres (Soybean)' :
+                linkedPlotId === 'tomato-field-c' ? 'Field C - 1.2 acres (Tomato)' :
+                linkedPlotId === 'maize-field-d' ? 'Field D - 2.0 acres (Maize)' : linkedPlotId
+              } (same as linked monitored plot)</span>
+            </p>
             {previousScan && (
               <p className="text-[11px] text-gray-600 pl-5">
-                <strong>Previous Diagnosis ({previousScan.date}):</strong> {previousScan.diagnosis}
+                Previous Diagnosis ({previousScan.date}): {previousScan.diagnosis}
               </p>
             )}
           </div>
         ) : (
-          <p className="text-[11px] text-gray-500 italic pl-1">
-            Standalone scan. If you choose to add this scan to your farm dashboard, you will be asked for the field location after diagnosis.
+          <p className="text-[11px] text-gray-500 italic">
+            Field location will only be asked if you choose to save this scan to your farm dashboard.
           </p>
         )}
       </div>
 
-      {/* 2. Observation Date - The ONLY date input kept */}
+      {/* Observation Date - ONLY manual input kept */}
       <div>
         <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5 text-[#257038]" />
@@ -117,64 +95,43 @@ function ScanFormFields({
           type="date"
           value={scanDate}
           onChange={(e) => setScanDate(e.target.value)}
-          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#257038] focus:border-transparent cursor-pointer shadow-xs"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#257038] focus:border-transparent cursor-pointer"
         />
       </div>
 
-      {/* 3. AI Auto-Scan Live Feedback (Crop & Growth Stage Auto-Scanned) */}
-      {isAutoDetecting && (
-        <div className="p-3 rounded-2xl bg-emerald-50/90 border border-emerald-300 flex items-center justify-between text-xs text-emerald-950 animate-pulse shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 animate-spin" />
-            </div>
-            <div>
-              <p className="font-bold text-[#154624]">AI Auto-Scanning Crop & Growth Stage...</p>
-              <p className="text-[10px] text-emerald-700">Analyzing leaf venation, color spectrum & morphology</p>
-            </div>
+      {/* AI Auto-Scan badge */}
+      {isAutoDetecting ? (
+        <div className="p-3 rounded-2xl bg-emerald-50/90 border border-emerald-300 flex items-center gap-2.5 text-xs text-emerald-950 animate-pulse">
+          <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <Sparkles className="w-3.5 h-3.5 animate-spin" />
           </div>
-          <span className="text-[10px] font-mono text-emerald-800 font-bold bg-white px-2.5 py-1 rounded-full border border-emerald-200 shadow-2xs">
-            Vision AI
-          </span>
+          <div>
+            <p className="font-bold text-[#154624]">AI Scanning Crop Type and Growth Stage...</p>
+            <p className="text-[10px] text-emerald-700">Gemini Vision analyzing leaf morphology</p>
+          </div>
         </div>
-      )}
-
-      {!isAutoDetecting && (selectedCrop || autoDetectStatus === 'detected') && (
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-green-50/80 to-emerald-50 border border-emerald-300 text-xs text-emerald-950 shadow-2xs space-y-1">
-          <div className="flex items-center justify-between flex-wrap gap-1.5">
-            <div className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-[#206332] text-white flex items-center justify-center text-[10px] font-black shadow-2xs">
-                ✓
-              </span>
-              <span className="font-extrabold text-[#194b29] uppercase tracking-wider text-[11px]">
-                Auto-Scanned from Photo:
-              </span>
-              <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-lg border border-emerald-200">
-                {selectedCrop ? `${selectedCrop.icon} ${selectedCrop.name}` : 'Identified Crop'}
-              </span>
-              <span className="text-gray-400">•</span>
-              <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-lg border border-emerald-200">
-                {selectedStage ? `${selectedStage.icon} ${selectedStage.name}` : 'Active Growth'}
-              </span>
-            </div>
-            {autoDetectResult?.confidence && (
-              <span className="text-[10px] font-black text-emerald-900 bg-emerald-200/90 border border-emerald-300 px-2 py-0.5 rounded-full">
-                {autoDetectResult.confidence}% Confidence
-              </span>
+      ) : selectedCrop ? (
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-green-50/80 to-emerald-50 border border-emerald-300 text-xs text-emerald-950">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="w-5 h-5 rounded-full bg-[#206332] text-white flex items-center justify-center text-[10px] font-black">V</span>
+            <span className="font-extrabold text-[#194b29] uppercase tracking-wider text-[11px]">Auto-Scanned:</span>
+            <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-lg border border-emerald-200">
+              {selectedCrop.icon} {selectedCrop.name}
+            </span>
+            {selectedStage && (
+              <>
+                <span className="text-gray-400">-</span>
+                <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-lg border border-emerald-200">
+                  {selectedStage.icon} {selectedStage.name}
+                </span>
+              </>
             )}
           </div>
-          {autoDetectResult?.reasoning && (
-            <p className="text-[11px] text-emerald-900/80 pl-7 leading-snug">
-              {autoDetectResult.reasoning}
-            </p>
-          )}
         </div>
-      )}
-
-      {!isAutoDetecting && !selectedCrop && autoDetectStatus !== 'detected' && (
+      ) : (
         <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-600 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#257038] shrink-0" />
-          <span>Crop species & growth stage are <strong>auto-scanned by Gemini AI</strong> when photo is attached.</span>
+          <span>Crop type and growth stage will be auto-detected by Gemini AI once a photo is attached.</span>
         </div>
       )}
     </div>
@@ -186,6 +143,9 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
   const [selectedCrop, setSelectedCrop] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
   const [scanDate, setScanDate] = useState(() => new Date().toISOString().split('T')[0]);
+  // Auto-detect state
+  const [isAutoDetecting, setIsAutoDetecting] = useState(false);
+  const [autoDetectResult, setAutoDetectResult] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
@@ -197,37 +157,32 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
   const [analysisStep, setAnalysisStep] = useState('');
   const [diagnosisResult, setDiagnosisResult] = useState(null);
   const [modelUsed, setModelUsed] = useState('Gemini AI');
-
-  // AI Auto-Detection State
-  const [isAutoDetecting, setIsAutoDetecting] = useState(false);
-  const [autoDetectStatus, setAutoDetectStatus] = useState(null);
-  const [autoDetectResult, setAutoDetectResult] = useState(null);
-
-  // Progressive Follow-Up & Dashboard Field Registration State
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+    
+  // Progressive Follow-Up & History State
   const [linkedPlotId, setLinkedPlotId] = useState(
     initialPlot ? (initialPlot.plotId || initialPlot.id) : ''
   );
-  const [fieldName, setFieldName] = useState('');
   const [treatmentOutcomeWorked, setTreatmentOutcomeWorked] = useState(null);
   const [savedToHistory, setSavedToHistory] = useState(false);
-
-  // Dynamic field creation for unmapped scans
   const [isAddingToDashboard, setIsAddingToDashboard] = useState(false);
   const [newPlotFieldName, setNewPlotFieldName] = useState('');
   const [newPlotAcres, setNewPlotAcres] = useState('2.0');
   const [savedNewFieldSuccess, setSavedNewFieldSuccess] = useState(false);
 
-  const fileInputRef = useRef(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
-
   useEffect(() => {
     if (initialPlot) {
       const pid = initialPlot.plotId || initialPlot.id;
       setLinkedPlotId(pid || '');
+      if (initialPlot.cropName) {
+        const found = CROP_OPTIONS.find(c => c.name.toLowerCase().includes(initialPlot.cropName.toLowerCase()));
+        if (found) setSelectedCrop(found);
+      }
       if (initialPlot.plotLocation) {
-        setFieldName(initialPlot.plotLocation);
+        // Field location auto-derived from linked plot
       }
     }
   }, [initialPlot]);
@@ -237,57 +192,18 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
     ? plotHistory.scans[plotHistory.scans.length - 1]
     : null;
 
-  const plotDisplayName = plotHistory 
-    ? `${plotHistory.plotLocation || plotHistory.cropName}` 
-    : (fieldName || 'Selected Monitored Plot');
-
   const handleSelectPlot = (pid) => {
     setLinkedPlotId(pid);
     setTreatmentOutcomeWorked(null);
     setSavedToHistory(false);
-    if (!pid) {
-      setFieldName('');
-      return;
-    }
+    if (!pid) return;
 
     const hist = getPlotHistory(pid);
     if (hist) {
-      setFieldName(hist.plotLocation || hist.cropName);
-    }
-  };
-
-  // Auto-detect crop and stage from image data URL using vision model
-  const autoDetectCropAndStage = async (dataUrl) => {
-    if (!dataUrl) return;
-    setIsAutoDetecting(true);
-    setAutoDetectStatus('scanning');
-    try {
-      const res = await fetch('/api/detect-crop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: dataUrl })
-      });
-      const json = await res.json();
-      if (json.success && json.data) {
-        const d = json.data;
-        setAutoDetectResult(d);
-        setAutoDetectStatus('detected');
-        setSelectedCrop({
-          id: d.cropId,
-          name: d.cropName,
-          icon: d.cropIcon || '🌱'
-        });
-        setSelectedStage({
-          id: d.growthStageId,
-          name: d.growthStageName,
-          icon: d.growthStageIcon || '🌿'
-        });
-      }
-    } catch (err) {
-      console.warn('Auto-detect crop error:', err);
-      setAutoDetectStatus('fallback');
-    } finally {
-      setIsAutoDetecting(false);
+      const foundCrop = CROP_OPTIONS.find(c => c.name.toLowerCase().includes(hist.cropName.toLowerCase()));
+      if (foundCrop) setSelectedCrop(foundCrop);
+      const foundStage = STAGE_OPTIONS.find(s => s.name.toLowerCase().includes(hist.currentStage.toLowerCase()));
+      if (foundStage) setSelectedStage(foundStage);
     }
   };
 
@@ -326,38 +242,6 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
     setSavedToHistory(true);
   };
 
-  // Farmer adds unmapped scan to dashboard as a new crop field
-  const handleSaveNewPlotToDashboard = () => {
-    if (!diagnosisResult) return;
-    const fieldLabel = newPlotFieldName.trim() || 'New Crop Field';
-    const acresLabel = newPlotAcres.trim() || '2.0';
-    const plotLocationFull = `${fieldLabel} • ${acresLabel} acres`;
-    const resolvedCrop = resolveCropDisplay(selectedCrop, diagnosisResult);
-    const newPlotId = `plot-${Date.now()}`;
-
-    const newScanEntry = {
-      id: `scan-${newPlotId}-1`,
-      scanNumber: 1,
-      date: `Today, ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} (Initial Scan)`,
-      daysAgo: 'Today',
-      stage: selectedStage ? selectedStage.name : 'Vegetative Stage',
-      lesionCoverage: '15% foliar lesion area',
-      severityScore: diagnosisResult.severity === 'Severe' ? 75 : 45,
-      diagnosis: diagnosisResult.diseaseName,
-      cropName: resolvedCrop.name,
-      field: plotLocationFull,
-      image: uploadedImage || capturedFrame || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80',
-      prescribedTactic: diagnosisResult.immediateAction || 'Standard initial treatment',
-      outcomeStatus: 'BASELINE_RECORDED',
-      outcomeReport: 'Initial baseline scan registered on Farm Dashboard.',
-      adaptiveTactics: []
-    };
-
-    appendScanToHistory(newPlotId, newScanEntry);
-    setSavedNewFieldSuccess(true);
-    setIsAddingToDashboard(false);
-  };
-
   function stopCamera() {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
@@ -367,19 +251,18 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
     setCameraActive(false);
   }
 
+
   useEffect(() => {
     if (!isOpen || activeTab !== 'camera') stopCamera();
   }, [isOpen, activeTab]);
 
   useEffect(() => { return () => stopCamera(); }, []);
 
+
   const startCamera = async () => {
     setCameraError(''); setCapturedFrame(null);
     try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
-      });
+      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
       streamRef.current = s;
       if (videoRef.current) { videoRef.current.srcObject = s; videoRef.current.play(); }
       setCameraActive(true);
@@ -429,22 +312,37 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
       r.readAsDataURL(f);
     }
   };
-
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
   const handleDrop = (e) => {
     e.preventDefault(); setIsDragging(false);
     const f = e.dataTransfer.files[0];
-    if (f) {
-      const r = new FileReader();
-      r.onloadend = () => {
-        setUploadedImage(r.result);
-        autoDetectCropAndStage(r.result);
-      };
-      r.readAsDataURL(f);
-    }
+    if (f) { const r = new FileReader(); r.onloadend = () => { setUploadedImage(r.result); autoDetectCropAndStage(r.result); }; r.readAsDataURL(f); }
   };
 
+
+  const autoDetectCropAndStage = async (dataUrl) => {
+    if (!dataUrl) return;
+    setIsAutoDetecting(true);
+    try {
+      const res = await fetch('/api/detect-crop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: dataUrl })
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const d = json.data;
+        setAutoDetectResult(d);
+        setSelectedCrop({ id: d.cropId, name: d.cropName, icon: d.cropIcon || 'x' });
+        setSelectedStage({ id: d.growthStageId, name: d.growthStageName, icon: d.growthStageIcon || 'x' });
+      }
+    } catch (err) {
+      console.warn('Auto-detect crop error:', err);
+    } finally {
+      setIsAutoDetecting(false);
+    }
+  };
   const handleAnalyze = async (imgOverride) => {
     const img = imgOverride || (activeTab === 'camera' ? capturedFrame : uploadedImage);
     setIsAnalyzing(true);
@@ -452,53 +350,62 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
     try {
       setTimeout(() => setAnalysisStep('Inspecting lesion patterns and fungal morphology...'), 700);
       setTimeout(() => setAnalysisStep('Formulating precautions and remedies...'), 1500);
-
-      const resolvedCrop = resolveCropDisplay(selectedCrop, null);
-      const effectiveCrop = resolvedCrop ? resolvedCrop.name : 'Crop';
-      const effectiveStage = selectedStage ? selectedStage.name : 'Vegetative Stage';
-      const effectiveField = plotDisplayName || 'Monitored Field';
-
       const payload = {
-        crop: effectiveCrop,
-        growthStage: effectiveStage,
-        fieldName: effectiveField,
+        crop: selectedCrop ? selectedCrop.name : 'Crop',
+        growthStage: selectedStage ? selectedStage.name : 'Vegetative Stage',
+        fieldName: linkedPlotId ? (
+          linkedPlotId === 'wheat-field-a' ? 'Field A (Wheat)' :
+          linkedPlotId === 'soybean-field-b' ? 'Field B (Soybean)' :
+          linkedPlotId === 'tomato-field-c' ? 'Field C (Tomato)' :
+          linkedPlotId === 'maize-field-d' ? 'Field D (Maize)' : linkedPlotId
+        ) : 'Farm Field',
         symptoms: '',
         weatherInfo: 'Temperature 26C, Humidity 84%, Rain expected in 7h',
         imageBase64: img && img.startsWith('data:') ? img : null,
       };
-
-      const res = await fetch('/api/diagnose', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const res = await fetch('/api/diagnose', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const json = await res.json();
-      if (json.success && json.data) {
-        setDiagnosisResult(json.data);
-        setModelUsed(json.modelUsed || 'Gemini AI');
-      } else {
-        throw new Error(json.error || 'Failed');
-      }
+      if (json.success && json.data) { setDiagnosisResult(json.data); setModelUsed(json.modelUsed || 'Gemini AI'); }
+      else throw new Error(json.error || 'Failed');
     } catch (err) {
-      const key = selectedCrop ? selectedCrop.id : 'potato';
+      const key = selectedCrop ? selectedCrop.id : 'tomato';
       const fb = cropDatabase.find(c => c.id.includes(key)) || cropDatabase[0];
       setDiagnosisResult({
-        cropName: selectedCrop ? selectedCrop.name : 'Potato',
-        diseaseName: fb.disease,
-        pathogen: fb.pathogen,
-        confidence: fb.confidence,
-        severity: fb.severity,
-        simpleExplanation: fb.description,
-        immediateAction: 'Prune diseased leaves and stop overhead watering.',
-        precautionsAndPrevention: fb.precautions,
-        organicRemedies: fb.treatments.organic,
-        chemicalTreatments: fb.treatments.chemical,
-        weatherRiskAnalysis: 'High humidity accelerates spore spread.',
+        diseaseName: fb.disease, pathogen: fb.pathogen, confidence: fb.confidence, severity: fb.severity,
+        simpleExplanation: fb.description, immediateAction: 'Prune diseased leaves and stop overhead watering.',
+        precautionsAndPrevention: fb.precautions, organicRemedies: fb.treatments.organic,
+        chemicalTreatments: fb.treatments.chemical, weatherRiskAnalysis: 'High humidity accelerates spore spread.',
       });
       setModelUsed('Kisan Rakshak Offline Engine');
-    } finally {
-      setIsAnalyzing(false);
-    }
+    } finally { setIsAnalyzing(false); }
+  };
+
+  const handleSaveNewPlotToDashboard = () => {
+    if (!diagnosisResult) return;
+    const fieldLabel = newPlotFieldName.trim() || 'New Crop Field';
+    const acresLabel = newPlotAcres.trim() || '2.0';
+    const plotLocationFull = fieldLabel + ' - ' + acresLabel + ' acres';
+    const newPlotId = 'plot-' + Date.now();
+    const resolvedCropName = selectedCrop ? selectedCrop.name : (diagnosisResult.cropName || 'Crop');
+    const newScanEntry = {
+      id: 'scan-' + newPlotId + '-1',
+      scanNumber: 1,
+      date: 'Today, ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' (Initial Scan)',
+      daysAgo: 'Today',
+      stage: selectedStage ? selectedStage.name : 'Vegetative Stage',
+      lesionCoverage: '15% foliar lesion area',
+      severityScore: 45,
+      diagnosis: diagnosisResult.diseaseName,
+      cropName: resolvedCropName,
+      field: plotLocationFull,
+      image: uploadedImage || capturedFrame || '',
+      prescribedTactic: diagnosisResult.immediateAction || 'Standard initial treatment',
+      outcomeStatus: 'BASELINE_RECORDED',
+      outcomeReport: 'Initial baseline scan registered on Farm Dashboard.'
+    };
+    appendScanToHistory(newPlotId, newScanEntry);
+    setSavedNewFieldSuccess(true);
+    setIsAddingToDashboard(false);
   };
 
   const handleReset = () => {
@@ -507,66 +414,52 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
     setCapturedFrame(null);
     setSelectedCrop(null);
     setSelectedStage(null);
-    setCameraActive(false);
     setAutoDetectResult(null);
-    setAutoDetectStatus(null);
+    setIsAutoDetecting(false);
+    setCameraActive(false);
     setSavedToHistory(false);
     setTreatmentOutcomeWorked(null);
-    setIsAddingToDashboard(false);
-    setSavedNewFieldSuccess(false);
   };
 
   const formProps = {
+    selectedCrop, selectedStage,
     scanDate, setScanDate,
-    linkedPlotId, handleSelectPlot, previousScan, plotDisplayName,
-    isAutoDetecting, autoDetectStatus, autoDetectResult,
-    selectedCrop, selectedStage
+    linkedPlotId, handleSelectPlot, previousScan,
+    isAutoDetecting
   };
-
   if (!isOpen) return null;
-
-  const currentCropDisplay = resolveCropDisplay(selectedCrop, diagnosisResult);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
       <div className="relative bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-100 my-4">
 
-        {/* Modal Header */}
         <div className="flex items-start justify-between px-6 pt-6 pb-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Diagnose My Crop</span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
-                <Sparkles className="w-3 h-3 text-[#257038]" /> Auto-Scan Vision AI
+                <Sparkles className="w-3 h-3 text-[#257038]" /> Powered by Gemini
               </span>
             </div>
             <h2 className="text-2xl font-extrabold text-[#1a4d2e]">Crop Disease Scanner</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Crop type & growth stage are automatically scanned by Gemini AI.</p>
+            <p className="text-xs text-gray-500 mt-0.5">Upload a photo or use the live camera — both use Gemini AI.</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 cursor-pointer mt-1">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Upload / Live Camera Switcher */}
         {!diagnosisResult && !isAnalyzing && (
           <div className="px-6 pt-3 pb-0">
             <div className="flex gap-2 p-1 bg-gray-100/80 rounded-2xl">
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => { setActiveTab('upload'); stopCamera(); setCapturedFrame(null); }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                  activeTab === 'upload' ? 'bg-white text-[#206332] shadow-sm border border-green-100' : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={"flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all cursor-pointer " + (activeTab === 'upload' ? "bg-white text-[#206332] shadow-sm border border-green-100" : "text-gray-500 hover:text-gray-700")}
               >
                 <Upload className="w-4 h-4" /> Upload Image
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('camera')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                  activeTab === 'camera' ? 'bg-white text-[#206332] shadow-sm border border-green-100' : 'text-gray-500 hover:text-gray-700'
-                }`}
+              <button type="button" onClick={() => setActiveTab('camera')}
+                className={"flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all cursor-pointer " + (activeTab === 'camera' ? "bg-white text-[#206332] shadow-sm border border-green-100" : "text-gray-500 hover:text-gray-700")}
               >
                 <Camera className="w-4 h-4" /> Live Camera Scanner
               </button>
@@ -576,21 +469,12 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
 
         <div className="p-6 pt-4">
 
-          {/* UPLOAD TAB */}
           {!diagnosisResult && !isAnalyzing && activeTab === 'upload' && (
             <div className="space-y-4">
               <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+                onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
                 onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                className={`relative w-full rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center p-5 text-center ${
-                  isDragging 
-                    ? 'border-[#257038] bg-green-50/80' 
-                    : uploadedImage 
-                      ? 'border-green-300 bg-gray-50' 
-                      : 'border-gray-300 hover:border-[#257038] bg-gray-50/50'
-                }`}
+                className={"relative w-full rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center p-5 text-center " + (isDragging ? "border-[#257038] bg-green-50/80" : uploadedImage ? "border-green-300 bg-gray-50" : "border-gray-300 hover:border-[#257038] bg-gray-50/50")}
               >
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                 {uploadedImage ? (
@@ -598,51 +482,36 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                     <div className="w-40 h-40 rounded-xl overflow-hidden shadow-md border-2 border-white">
                       <img src={uploadedImage} alt="Crop" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-xs text-emerald-800 font-bold mt-2">Leaf Photograph Attached</p>
+                    <p className="text-xs text-emerald-800 font-bold mt-2">Image Attached</p>
                     <p className="text-[11px] text-gray-500">Click or drop to replace</p>
                   </div>
                 ) : (
                   <div className="space-y-2 py-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow border border-gray-200 flex items-center justify-center mx-auto text-[#257038]">
-                      <Upload className="w-6 h-6" />
-                    </div>
-                    <p className="text-sm font-bold text-gray-800">Drag & Drop or Click to Upload Leaf Photo</p>
-                    <p className="text-xs text-gray-500">AI auto-scans crop species, growth stage, and pathology instantly</p>
+                    <div className="w-12 h-12 rounded-2xl bg-white shadow border border-gray-200 flex items-center justify-center mx-auto text-[#257038]"><Upload className="w-6 h-6" /></div>
+                    <p className="text-sm font-bold text-gray-800">Drag & Drop or Click to Upload</p>
+                    <p className="text-xs text-gray-500">High-resolution leaf or fruit photo (PNG, JPG)</p>
                   </div>
                 )}
               </div>
-
-              {/* Form Fields: Only Date & Field Location */}
               <ScanFormFields {...formProps} />
-
               <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={() => handleAnalyze()}
-                  disabled={!uploadedImage}
-                  className="w-full py-3.5 px-6 rounded-xl bg-[#206332] hover:bg-[#184e27] disabled:bg-gray-300 text-white font-extrabold text-sm tracking-wide shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                <button type="button" onClick={() => handleAnalyze()}
+                  className="w-full py-3.5 px-6 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-extrabold text-sm tracking-wide shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4" /> Run AI Disease Diagnosis
+                  <Sparkles className="w-4 h-4" /> Analyze with Gemini AI
                 </button>
               </div>
             </div>
           )}
 
-          {/* LIVE CAMERA TAB */}
           {!diagnosisResult && !isAnalyzing && activeTab === 'camera' && (
             <div className="space-y-4">
               <div className="relative w-full rounded-2xl overflow-hidden bg-gray-900 border border-gray-200" style={{minHeight:'240px'}}>
                 <canvas ref={canvasRef} className="hidden" />
                 {cameraActive && !capturedFrame && (
                   <>
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full object-cover rounded-2xl"
-                      style={{transform: isMirrored ? 'scaleX(-1)' : 'none', maxHeight:'280px'}}
-                    />
+                    <video ref={videoRef} autoPlay playsInline muted className="w-full object-cover rounded-2xl"
+                      style={{transform: isMirrored ? 'scaleX(-1)' : 'none', maxHeight:'280px'}} />
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                       <div className="relative w-44 h-44">
                         <div className="absolute top-0 left-0 w-8 h-8 border-emerald-400 rounded-tl-lg" style={{borderTop:'3px solid',borderLeft:'3px solid'}} />
@@ -657,9 +526,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                         <SwitchCamera className="w-5 h-5 text-white" />
                       </button>
                       <button type="button" onClick={captureSnapshot} className="w-16 h-16 rounded-full bg-white border-4 border-emerald-400 flex items-center justify-center shadow-xl cursor-pointer hover:scale-105 active:scale-95 transition-transform">
-                        <div className="w-11 h-11 rounded-full bg-[#206332] flex items-center justify-center">
-                          <Circle className="w-5 h-5 text-white fill-white" />
-                        </div>
+                        <div className="w-11 h-11 rounded-full bg-[#206332] flex items-center justify-center"><Circle className="w-5 h-5 text-white fill-white" /></div>
                       </button>
                       <button type="button" onClick={() => setIsMirrored(m => !m)} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center cursor-pointer border border-white/30">
                         <FlipHorizontal className={"w-5 h-5 " + (isMirrored ? "text-emerald-300" : "text-white")} />
@@ -671,25 +538,20 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                     </div>
                   </>
                 )}
-
                 {capturedFrame && (
                   <div className="relative flex flex-col items-center">
                     <img src={capturedFrame} alt="Captured" className="w-full rounded-2xl object-cover" style={{maxHeight:'280px'}} />
                     <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-600/90 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                      <span className="text-xs text-white font-bold">Captured & Auto-Scanning</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" /><span className="text-xs text-white font-bold">Captured</span>
                     </div>
                     <button type="button" onClick={retakePhoto} className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 text-xs font-bold text-gray-800 hover:bg-white cursor-pointer shadow-md">
                       <RefreshCw className="w-3.5 h-3.5" /> Retake
                     </button>
                   </div>
                 )}
-
                 {!cameraActive && !capturedFrame && !cameraError && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-900 rounded-2xl p-6">
-                    <div className="w-16 h-16 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center">
-                      <Camera className="w-8 h-8 text-gray-400" />
-                    </div>
+                    <div className="w-16 h-16 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center"><Camera className="w-8 h-8 text-gray-400" /></div>
                     <div className="text-center">
                       <p className="text-sm font-bold text-gray-200">Real-Time Crop Scanner</p>
                       <p className="text-xs text-gray-500 mt-1">Point camera at a leaf or fruit for live AI detection.</p>
@@ -699,7 +561,6 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                     </button>
                   </div>
                 )}
-
                 {cameraError && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-900 rounded-2xl p-6">
                     <VideoOff className="w-10 h-10 text-red-500" />
@@ -710,7 +571,6 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                   </div>
                 )}
               </div>
-
               {!capturedFrame && (
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-xs">
@@ -726,109 +586,56 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                   )}
                 </div>
               )}
-
-              {/* Form Fields: Only Date & Field Location */}
               <ScanFormFields {...formProps} />
-
               {capturedFrame && (
                 <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => handleAnalyze(capturedFrame)}
+                  <button type="button" onClick={() => handleAnalyze(capturedFrame)}
                     className="w-full py-3.5 px-6 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-extrabold text-sm tracking-wide shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4" /> Run AI Disease Diagnosis on Snapshot
+                    <Sparkles className="w-4 h-4" /> Analyze Captured Crop with Gemini AI
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {/* ANALYZING SPINNER */}
           {isAnalyzing && (
             <div className="py-14 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center animate-bounce">
-                <Sparkles className="w-8 h-8 text-[#257038]" />
-              </div>
+              <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center animate-bounce"><Sparkles className="w-8 h-8 text-[#257038]" /></div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Gemini Plant Pathology Engine Active</h3>
                 <p className="text-xs text-gray-500 font-mono mt-1">{analysisStep}</p>
               </div>
-              <div className="w-56 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="w-3/4 h-full bg-[#257038] rounded-full animate-pulse" />
-              </div>
+              <div className="w-56 h-2 bg-gray-200 rounded-full overflow-hidden"><div className="w-3/4 h-full bg-[#257038] rounded-full animate-pulse" /></div>
             </div>
           )}
 
-          {/* DIAGNOSIS RESULTS VIEW */}
           {diagnosisResult && !isAnalyzing && (
             <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-              
-              {/* Top Diagnosis Card */}
               <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-green-50 border border-green-200">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        {diagnosisResult.confidence}% Confidence
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                        {diagnosisResult.severity || 'Moderate'} Severity
-                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">{diagnosisResult.confidence}% Confidence</span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">{diagnosisResult.severity || 'Moderate'} Severity</span>
                       <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
                         {activeTab === 'camera' ? <Camera className="w-2.5 h-2.5" /> : <Upload className="w-2.5 h-2.5" />}
                         {activeTab === 'camera' ? 'Camera Scan' : 'Upload Scan'}
                       </span>
                     </div>
-
-                    <h3 className="text-xl font-extrabold text-gray-900">
-                      {diagnosisResult.diseaseName}
-                      {diagnosisResult.diseaseHindi && (
-                        <span className="text-base font-bold text-gray-700 ml-2">
-                          ({diagnosisResult.diseaseHindi})
-                        </span>
-                      )}
-                    </h3>
-
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-600">
-                        Crop: <span className="font-semibold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200">
-                          {currentCropDisplay.icon} {currentCropDisplay.name}
-                        </span>
-                      </span>
-
-                      {/* Display confirmed Field Location if linked to monitored plot */}
-                      {linkedPlotId && (
-                        <span className="text-xs text-gray-600">
-                          Field: <span className="font-semibold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200">
-                            📍 {plotDisplayName}
-                          </span>
-                        </span>
-                      )}
-                    </div>
-
-                    {diagnosisResult.pathogen && (
-                      <p className="text-xs text-emerald-800 font-mono mt-1">
-                        Pathogen: {diagnosisResult.pathogen}
-                      </p>
-                    )}
+                    <h3 className="text-xl font-extrabold text-gray-900">{diagnosisResult.diseaseName}</h3>
+                    <p className="text-xs text-gray-600 mt-0.5">Crop: <span className="font-semibold">{selectedCrop ? (selectedCrop.icon + ' ' + selectedCrop.name) : (diagnosisResult.cropName || 'Agricultural Crop')}</span></p>
+                    {diagnosisResult.pathogen && <p className="text-xs text-emerald-800 font-mono mt-0.5">Pathogen: {diagnosisResult.pathogen}</p>}
                   </div>
-
-                  <span className="text-[10px] font-bold text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-200 shrink-0">
-                    {modelUsed}
-                  </span>
+                  <span className="text-[10px] font-bold text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-200 shrink-0">{modelUsed}</span>
                 </div>
               </div>
-
               {diagnosisResult.simpleExplanation && (
                 <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#1a5028] uppercase tracking-wider mb-1">
-                    <Leaf className="w-3.5 h-3.5" /> What is Happening:
-                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#1a5028] uppercase tracking-wider mb-1"><Leaf className="w-3.5 h-3.5" /> What is Happening:</div>
                   <p className="text-xs text-gray-800 leading-relaxed">{diagnosisResult.simpleExplanation}</p>
                 </div>
               )}
-
               {diagnosisResult.immediateAction && (
                 <div className="p-3.5 rounded-xl bg-red-50/80 border border-red-200 flex items-start gap-2.5">
                   <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
@@ -838,87 +645,56 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                   </div>
                 </div>
               )}
-
               {diagnosisResult.precautionsAndPrevention && (
                 <div className="p-4 rounded-2xl bg-[#fbfdfa] border border-gray-200 space-y-2">
-                  <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#257038]" /> Precautions:
-                  </h4>
+                  <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#257038]" /> Precautions:</h4>
                   <ul className="space-y-1.5 text-xs text-gray-700">
                     {diagnosisResult.precautionsAndPrevention.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#257038] shrink-0 mt-0.5" />
-                        <span>{item}</span>
-                      </li>
+                      <li key={i} className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#257038] shrink-0 mt-0.5" /><span>{item}</span></li>
                     ))}
                   </ul>
                 </div>
               )}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {diagnosisResult.organicRemedies && (
                   <div className="p-3.5 rounded-xl bg-[#edf7ef] border border-green-200">
-                    <h5 className="text-[11px] font-bold text-green-900 uppercase mb-1.5 flex items-center gap-1.5">
-                      <Leaf className="w-3.5 h-3.5" /> Organic:
-                    </h5>
+                    <h5 className="text-[11px] font-bold text-green-900 uppercase mb-1.5 flex items-center gap-1.5"><Leaf className="w-3.5 h-3.5" /> Organic:</h5>
                     <ul className="space-y-1 text-xs text-gray-700">
-                      {diagnosisResult.organicRemedies.map((r, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <span className="text-[#257038] font-bold">•</span>
-                          <span>{r}</span>
-                        </li>
-                      ))}
+                      {diagnosisResult.organicRemedies.map((r, i) => <li key={i} className="flex items-start gap-1.5"><span className="text-[#257038] font-bold">•</span><span>{r}</span></li>)}
                     </ul>
                   </div>
                 )}
                 {diagnosisResult.chemicalTreatments && (
                   <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200">
-                    <h5 className="text-[11px] font-bold text-gray-900 uppercase mb-1.5 flex items-center gap-1.5">
-                      <ShieldAlert className="w-3.5 h-3.5 text-[#257038]" /> Chemical:
-                    </h5>
+                    <h5 className="text-[11px] font-bold text-gray-900 uppercase mb-1.5 flex items-center gap-1.5"><ShieldAlert className="w-3.5 h-3.5 text-[#257038]" /> Chemical:</h5>
                     <ul className="space-y-1 text-xs text-gray-700">
-                      {diagnosisResult.chemicalTreatments.map((c, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <span className="text-[#257038] font-bold">•</span>
-                          <span>{c}</span>
-                        </li>
-                      ))}
+                      {diagnosisResult.chemicalTreatments.map((c, i) => <li key={i} className="flex items-start gap-1.5"><span className="text-[#257038] font-bold">•</span><span>{c}</span></li>)}
                     </ul>
                   </div>
                 )}
               </div>
-
               {diagnosisResult.weatherRiskAnalysis && (
                 <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
                   <CloudSun className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <div><span className="font-bold">Weather Risk: </span>{diagnosisResult.weatherRiskAnalysis}</div>
                 </div>
               )}
-
-              {/* SECTION A: Monitored Plot Linked - Field is the SAME as the monitored plot */}
-              {linkedPlotId && (
+              {/* Progressive Memory & Follow-up Efficacy Check */}
+              {previousScan && (
                 <div className="p-4 rounded-2xl bg-[#f7faf8] border border-emerald-200 shadow-2xs space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
                       <RefreshCw className="w-3.5 h-3.5 text-[#257038]" />
-                      <span>Progressive Evaluation vs Scan #{previousScan ? previousScan.scanNumber : 1}</span>
+                      <span>Progressive Evaluation vs Scan #{previousScan.scanNumber}</span>
                     </span>
-                    {previousScan && (
-                      <span className="text-[10px] font-bold text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200">
-                        Baseline: {previousScan.date}
-                      </span>
-                    )}
+                    <span className="text-[10px] font-bold text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200">
+                      Baseline: {previousScan.date}
+                    </span>
                   </div>
 
                   <div className="p-2.5 rounded-xl bg-white border border-gray-200 text-xs space-y-1">
-                    <p className="text-gray-500 text-[10px] font-bold uppercase">Field Location:</p>
-                    <p className="text-gray-800 font-semibold">📍 {plotDisplayName}</p>
-                    {previousScan && (
-                      <>
-                        <p className="text-gray-500 text-[10px] font-bold uppercase mt-1">Previous Prescribed Measures:</p>
-                        <p className="text-gray-800 font-semibold">{previousScan.prescribedTactic}</p>
-                      </>
-                    )}
+                    <p className="text-gray-500 text-[10px] font-bold uppercase">Previous Recommended Measures:</p>
+                    <p className="text-gray-800 font-semibold">{previousScan.prescribedTactic}</p>
                   </div>
 
                   <div>
@@ -986,125 +762,86 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                 </div>
               )}
 
-              {/* SECTION B: Unmapped Scan - Ask for Field ONLY when farmer decides to add to dashboard as new crop field */}
+
+              {/* Unmapped Scan: Ask for field ONLY when farmer chooses to add to dashboard */}
               {!linkedPlotId && (
                 <div className="space-y-3">
                   {!savedNewFieldSuccess && !isAddingToDashboard && (
                     <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-green-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                       <div>
                         <p className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
-                          <Layers className="w-4 h-4 text-[#257038]" />
+                          <span>+</span>
                           <span>Add to Farm Dashboard</span>
                         </p>
                         <p className="text-[11px] text-gray-600 mt-0.5">
-                          Save this diagnosed crop as a monitored field to track recovery progress over time.
+                          Save this diagnosed crop as a new monitored field to track recovery over time.
                         </p>
                       </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          setIsAddingToDashboard(true);
-                          setNewPlotFieldName(newPlotFieldName || 'Field E (New Plot)');
-                        }}
+                        onClick={() => { setIsAddingToDashboard(true); }}
                         className="px-4 py-2 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
                       >
-                        <Plus className="w-3.5 h-3.5" />
                         <span>Add as New Crop Field</span>
                       </button>
                     </div>
                   )}
-
                   {!savedNewFieldSuccess && isAddingToDashboard && (
                     <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-300 space-y-3 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold text-[#1a4d2e] uppercase tracking-wider flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-[#257038]" />
-                          <span>Assign Field Location</span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setIsAddingToDashboard(false)}
-                          className="text-gray-400 hover:text-gray-600 text-xs font-bold cursor-pointer"
-                        >
-                          Cancel
-                        </button>
+                        <span className="text-xs font-extrabold text-[#1a4d2e] uppercase tracking-wider">Assign Field Location</span>
+                        <button type="button" onClick={() => setIsAddingToDashboard(false)} className="text-gray-400 hover:text-gray-600 text-xs font-bold cursor-pointer">Cancel</button>
                       </div>
-
-                      <p className="text-[11px] text-gray-600 leading-snug">
-                        Specify the field location for this diagnosed <strong>{currentCropDisplay.name}</strong> crop to add it to your farm dashboard:
-                      </p>
-
+                      <p className="text-[11px] text-gray-600">Enter a name and size for this new crop field:</p>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <div className="sm:col-span-2">
-                          <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                            Field Name / Plot Location <span className="text-red-500">*</span>
-                          </label>
+                          <label className="block text-[11px] font-bold text-gray-700 mb-1">Field Name / Plot Location *</label>
                           <input
                             type="text"
                             value={newPlotFieldName}
                             onChange={(e) => setNewPlotFieldName(e.target.value)}
                             placeholder="e.g. Field E, North Acre, Polyhouse 1..."
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038]"
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-[#257038]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                            Plot Area (Acres)
-                          </label>
+                          <label className="block text-[11px] font-bold text-gray-700 mb-1">Area (Acres)</label>
                           <input
                             type="text"
                             value={newPlotAcres}
                             onChange={(e) => setNewPlotAcres(e.target.value)}
-                            placeholder="e.g. 2.0"
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038]"
+                            placeholder="2.0"
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-[#257038]"
                           />
                         </div>
                       </div>
-
                       <button
                         type="button"
                         onClick={handleSaveNewPlotToDashboard}
-                        className="w-full py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                        className="w-full py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold cursor-pointer flex items-center justify-center gap-2"
                       >
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>Save Field & Scan to Farm Dashboard</span>
+                        <span>Save Field and Scan to Dashboard</span>
                       </button>
                     </div>
                   )}
-
                   {savedNewFieldSuccess && (
-                    <div className="p-3.5 rounded-xl bg-emerald-100/90 border border-emerald-300 text-xs text-emerald-950 flex items-center justify-between shadow-2xs">
+                    <div className="p-3.5 rounded-xl bg-emerald-100/90 border border-emerald-300 text-xs text-emerald-950 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-                        <span>
-                          <strong>{newPlotFieldName} ({newPlotAcres} acres)</strong> added to your Farm Dashboard!
-                        </span>
+                        <span><strong>{newPlotFieldName} ({newPlotAcres} acres)</strong> added to your Farm Dashboard!</span>
                       </div>
-                      <span className="text-[10px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
-                        Monitored Active
-                      </span>
+                      <span className="text-[10px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">Monitored Active</span>
                     </div>
                   )}
                 </div>
               )}
-
               <div className="pt-2 flex items-center gap-3 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="flex-1 py-2.5 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs cursor-pointer"
-                >
-                  Diagnose Another
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                >
+                <button type="button" onClick={handleReset} className="flex-1 py-2.5 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs cursor-pointer">Diagnose Another</button>
+                <button type="button" onClick={onClose} className="flex-1 py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                   Done <CheckCircle2 className="w-3.5 h-3.5" />
                 </button>
               </div>
-
             </div>
           )}
 
