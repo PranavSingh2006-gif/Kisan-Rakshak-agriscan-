@@ -2,98 +2,71 @@ import React, { useState } from 'react';
 import { 
   Camera, Upload, Sparkles, CheckCircle2, AlertTriangle, ShieldCheck, 
   Leaf, RefreshCw, ChevronDown, Activity, Check, Info, FileText, ArrowRight,
-  Calendar, MapPin, Microscope, ThermometerSun, Database, ShieldAlert
+  Calendar, MapPin, Microscope, ThermometerSun, Database, ShieldAlert,
+  Plus, Layers
 } from 'lucide-react';
 import { matchAgainstUnifiedDataset, UNIFIED_CROP_DISEASE_DATASET } from '../../data/unifiedCropDiseaseDataset';
-
-const CROP_OPTIONS = [
-  'Wheat (गेहूं)',
-  'Rice / Paddy (धान)',
-  'Potato (आलू)',
-  'Tomato (टमाटर)',
-  'Sugarcane (गन्ना)',
-  'Mustard (सरसों)',
-  'Cotton (कपास)',
-  'Maize / Corn (मक्का)',
-  'Chilli / Pepper (मिर्च)',
-  'Soybean (सोयाबीन)',
-  'Onion (प्याज)',
-  'Other Field Crop (अन्य)'
-];
-
-const GROWTH_STAGES = [
-  'Seedling & Germination (अंकुरण / पौध)',
-  'Vegetative & Foliage Growth (वानस्पतिक विकास)',
-  'Flowering & Budding (फूल आना)',
-  'Fruiting & Grain Formation (फल / दाना बनना)',
-  'Maturity & Pre-Harvest (परिपक्वता / कटाई पूर्व)'
-];
-
-const FIELD_OPTIONS = [
-  'Field A (North Plot)',
-  'Field B (East Acre)',
-  'Field C (South Ridge)',
-  'Field D (Canal Side)',
-  'Field E (Polyhouse / Greenhouse)',
-  'Field F (Custom Plot)'
-];
-
-const BENCHMARK_SAMPLES = [
-  { 
-    label: '🥔 Potato Late Blight', 
-    crop: 'Potato (आलू)', 
-    stage: 'Vegetative & Foliage Growth (वानस्पतिक विकास)', 
-    diseaseQuery: 'Late Blight Phytophthora infestans',
-    url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80' 
-  },
-  { 
-    label: '🍅 Tomato Early Blight', 
-    crop: 'Tomato (टमाटर)', 
-    stage: 'Fruiting & Grain Formation (फल / दाना बनना)', 
-    diseaseQuery: 'Tomato Early Blight Alternaria',
-    url: 'https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&w=800&q=80' 
-  },
-  { 
-    label: '🌾 Wheat Stripe Rust', 
-    crop: 'Wheat (गेहूं)', 
-    stage: 'Flowering & Budding (फूल आना)', 
-    diseaseQuery: 'Wheat Stripe Yellow Rust Puccinia striiformis',
-    url: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80' 
-  },
-  { 
-    label: '🌾 Rice Bacterial Blight', 
-    crop: 'Rice / Paddy (धान)', 
-    stage: 'Vegetative & Foliage Growth (वानस्पतिक विकास)', 
-    diseaseQuery: 'Rice Bacterial Blight Xanthomonas',
-    url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80' 
-  },
-  { 
-    label: '🌽 Corn Northern Blight', 
-    crop: 'Maize / Corn (मक्का)', 
-    stage: 'Fruiting & Grain Formation (फल / दाना बनना)', 
-    diseaseQuery: 'Corn Northern Leaf Blight Exserohilum',
-    url: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=800&q=80' 
-  },
-  { 
-    label: '🍇 Grape Black Rot', 
-    crop: 'Other Field Crop (अन्य)', 
-    stage: 'Fruiting & Grain Formation (फल / दाना बनना)', 
-    diseaseQuery: 'Grape Black Rot Guignardia bidwellii',
-    url: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=800&q=80' 
-  }
-];
+import { getAllPlotHistories, getPlotHistory, appendScanToHistory } from '../../data/progressiveScanHistory';
 
 export default function CropScanFeatureCard() {
-  const [scanDate, setScanDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedField, setSelectedField] = useState('Field A (North Plot)');
-  const [selectedCrop, setSelectedCrop] = useState('');
-  const [selectedStage, setSelectedStage] = useState('');
+  const [scanDate, setScanDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [linkedPlotId, setLinkedPlotId] = useState('');
+  
+  // AI Auto-Detection State
+  const [isAutoDetecting, setIsAutoDetecting] = useState(false);
+  const [autoDetectStatus, setAutoDetectStatus] = useState(null);
+  const [autoDetectResult, setAutoDetectResult] = useState(null);
+  const [detectedCropName, setDetectedCropName] = useState('');
+  const [detectedStageName, setDetectedStageName] = useState('');
+
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [diagnosis, setDiagnosis] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Follow-up diary and dynamic field addition state
+  const [savedToHistory, setSavedToHistory] = useState(false);
+  const [isAddingToDashboard, setIsAddingToDashboard] = useState(false);
+  const [newPlotFieldName, setNewPlotFieldName] = useState('');
+  const [newPlotAcres, setNewPlotAcres] = useState('2.0');
+  const [savedNewFieldSuccess, setSavedNewFieldSuccess] = useState(false);
+
+  const plotHistory = linkedPlotId ? getPlotHistory(linkedPlotId) : null;
+  const previousScan = plotHistory && plotHistory.scans && plotHistory.scans.length > 0
+    ? plotHistory.scans[plotHistory.scans.length - 1]
+    : null;
+
+  const plotDisplayName = plotHistory 
+    ? `${plotHistory.plotLocation || plotHistory.cropName}` 
+    : 'Selected Monitored Plot';
+
+  // AI Auto-detection from image data URL
+  const autoDetectCrop = async (dataUrl) => {
+    if (!dataUrl) return;
+    setIsAutoDetecting(true);
+    setAutoDetectStatus('scanning');
+    try {
+      const res = await fetch('/api/detect-crop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: dataUrl })
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setAutoDetectResult(json.data);
+        setAutoDetectStatus('detected');
+        setDetectedCropName(json.data.cropName);
+        setDetectedStageName(json.data.growthStageName);
+      }
+    } catch (err) {
+      console.warn('Auto-detect crop error:', err);
+      setAutoDetectStatus('fallback');
+    } finally {
+      setIsAutoDetecting(false);
+    }
+  };
 
   const handleFileSelect = (file) => {
     if (!file || !file.type.startsWith('image/')) {
@@ -103,7 +76,11 @@ export default function CropScanFeatureCard() {
     setErrorMsg('');
     setImageFile(file);
     const reader = new FileReader();
-    reader.onload = (e) => setPreviewUrl(e.target.result);
+    reader.onload = (e) => {
+      const result = e.target.result;
+      setPreviewUrl(result);
+      autoDetectCrop(result);
+    };
     reader.readAsDataURL(file);
     setDiagnosis(null);
   };
@@ -118,7 +95,7 @@ export default function CropScanFeatureCard() {
 
   const runDiagnosis = async () => {
     if (!previewUrl) {
-      setErrorMsg('Please upload a leaf photograph or select a benchmark sample image.');
+      setErrorMsg('Please upload a leaf photograph to analyze.');
       return;
     }
 
@@ -126,7 +103,10 @@ export default function CropScanFeatureCard() {
     setErrorMsg('');
     setDiagnosis(null);
 
-    const cropKey = selectedCrop.split(' ')[0] || 'Potato';
+    const effectiveCrop = detectedCropName || autoDetectResult?.cropName || 'Potato';
+    const effectiveStage = detectedStageName || autoDetectResult?.growthStageName || 'Vegetative & Foliage Growth';
+    const effectiveField = linkedPlotId ? plotDisplayName : 'Field Plot';
+    const cropKey = effectiveCrop.split(' ')[0] || 'Potato';
     const benchmarkMatch = matchAgainstUnifiedDataset(cropKey, '');
 
     try {
@@ -138,7 +118,6 @@ export default function CropScanFeatureCard() {
         mimeType = parts[0].split(';')[0].split(':')[1];
         base64Data = parts[1];
       } else {
-        // Fetch external sample image and convert to base64
         const resp = await fetch(previewUrl);
         const blob = await resp.blob();
         mimeType = blob.type || 'image/jpeg';
@@ -153,11 +132,11 @@ export default function CropScanFeatureCard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageBase64: base64Data,
+          imageBase64: `data:${mimeType};base64,${base64Data}`,
           mimeType: mimeType,
-          crop: selectedCrop || 'Potato',
-          growthStage: selectedStage || 'Vegetative & Foliage Growth',
-          fieldName: selectedField || 'Field A (North Plot)'
+          crop: effectiveCrop,
+          growthStage: effectiveStage,
+          fieldName: effectiveField
         })
       });
 
@@ -185,8 +164,11 @@ export default function CropScanFeatureCard() {
       const precautions = extractList(raw.precautionsAndPrevention || raw.precautions);
       const symptoms = extractList(raw.identifiedSymptoms || raw.symptoms);
 
+      const resolvedCropName = raw.cropName || effectiveCrop;
+
       const normalized = {
-        diseaseName: raw.diseaseName || matchedDatasetItem?.diseaseName || 'Late Blight & Water Mold Rot',
+        cropName: resolvedCropName,
+        diseaseName: raw.diseaseName || matchedDatasetItem?.diseaseName || 'Late Blight & Foliar Necrosis',
         diseaseHindi: raw.diseaseHindi || matchedDatasetItem?.diseaseHindi || 'पछेती झुलसा',
         scientificName: raw.pathogen || raw.scientificName || matchedDatasetItem?.pathogen || 'Phytophthora infestans',
         pathogenType: raw.pathogenType || matchedDatasetItem?.pathogenType || 'Oomycete (Water Mold)',
@@ -223,6 +205,7 @@ export default function CropScanFeatureCard() {
       console.warn('Backend API fallback triggered, grounding via Master Dataset:', err);
       const fallbackRecord = matchAgainstUnifiedDataset(cropKey, '') || UNIFIED_CROP_DISEASE_DATASET[0];
       setDiagnosis({
+        cropName: effectiveCrop,
         diseaseName: fallbackRecord.diseaseName,
         diseaseHindi: fallbackRecord.diseaseHindi,
         scientificName: fallbackRecord.pathogen,
@@ -246,6 +229,64 @@ export default function CropScanFeatureCard() {
     }
   };
 
+  // Save follow-up scan for monitored plot
+  const handleSaveFollowUpScan = () => {
+    if (!linkedPlotId || !diagnosis) return;
+    const hist = getPlotHistory(linkedPlotId);
+    const lastScan = hist && hist.scans ? hist.scans[hist.scans.length - 1] : null;
+    const scanNum = lastScan ? lastScan.scanNumber + 1 : 1;
+
+    const newScanEntry = {
+      id: `scan-${linkedPlotId}-${Date.now()}`,
+      scanNumber: scanNum,
+      date: `Today, ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} (Follow-up #${scanNum})`,
+      daysAgo: 'Today',
+      stage: detectedStageName || (hist ? hist.currentStage : 'Active Stage'),
+      lesionCoverage: 'Controlled foliar recovery',
+      severityScore: diagnosis.severity === 'Severe' ? 70 : 30,
+      diagnosis: diagnosis.diseaseName,
+      cropName: diagnosis.cropName || hist?.cropName || 'Crop',
+      field: plotDisplayName,
+      image: previewUrl || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80',
+      prescribedTactic: diagnosis.immediateAction || 'Standard maintenance',
+      outcomeStatus: 'PREVIOUS_TREATMENT_WORKED',
+      outcomeReport: 'Follow-up diagnosis recorded in diary.'
+    };
+
+    appendScanToHistory(linkedPlotId, newScanEntry);
+    setSavedToHistory(true);
+  };
+
+  // Farmer adds unmapped scan as new crop field to dashboard
+  const handleSaveNewPlotToDashboard = () => {
+    if (!diagnosis) return;
+    const fieldLabel = newPlotFieldName.trim() || 'New Crop Field';
+    const acresLabel = newPlotAcres.trim() || '2.0';
+    const plotLocationFull = `${fieldLabel} • ${acresLabel} acres`;
+    const newPlotId = `plot-${Date.now()}`;
+
+    const newScanEntry = {
+      id: `scan-${newPlotId}-1`,
+      scanNumber: 1,
+      date: `Today, ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} (Initial Scan)`,
+      daysAgo: 'Today',
+      stage: detectedStageName || 'Vegetative Stage',
+      lesionCoverage: '15% foliar lesion area',
+      severityScore: diagnosis.severity === 'Severe' ? 75 : 45,
+      diagnosis: diagnosis.diseaseName,
+      cropName: diagnosis.cropName || 'Crop',
+      field: plotLocationFull,
+      image: previewUrl || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80',
+      prescribedTactic: diagnosis.immediateAction || 'Standard initial treatment',
+      outcomeStatus: 'BASELINE_RECORDED',
+      outcomeReport: 'Initial baseline scan registered on Farm Dashboard.'
+    };
+
+    appendScanToHistory(newPlotId, newScanEntry);
+    setSavedNewFieldSuccess(true);
+    setIsAddingToDashboard(false);
+  };
+
   return (
     <section id="scan" className="bg-white rounded-3xl p-6 sm:p-10 border border-green-200/90 shadow-xl shadow-green-950/5 transition-all">
       
@@ -260,7 +301,7 @@ export default function CropScanFeatureCard() {
             Instant Crop Disease Scanner
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Grounded against <strong>PlantVillage (54K)</strong>, <strong>SAGE (CVPR 2026)</strong>, <strong>CDDMBench</strong>, and <strong>Roboflow</strong> datasets with precision disease specifications, precautions, and dual-track treatments.
+            Crop species and growth stages are <strong>automatically scanned by Gemini Vision AI</strong> from leaf photography.
           </p>
         </div>
 
@@ -307,7 +348,15 @@ export default function CropScanFeatureCard() {
                     />
                   </label>
                   <button
-                    onClick={() => { setPreviewUrl(null); setImageFile(null); setDiagnosis(null); }}
+                    onClick={() => {
+                      setPreviewUrl(null);
+                      setImageFile(null);
+                      setDiagnosis(null);
+                      setAutoDetectResult(null);
+                      setAutoDetectStatus(null);
+                      setDetectedCropName('');
+                      setDetectedStageName('');
+                    }}
                     className="bg-red-600 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow hover:bg-red-700 transition-colors cursor-pointer"
                   >
                     Remove
@@ -332,18 +381,66 @@ export default function CropScanFeatureCard() {
                   <span className="text-sm text-gray-500 font-medium"> or drag & drop leaf photo here</span>
                 </div>
                 <p className="text-xs text-gray-400">
-                  Supports JPG, PNG, WEBP up to 10MB
+                  AI automatically detects crop species & stage on upload
                 </p>
               </div>
             )}
           </div>
 
+          {/* Form Fields: Only Date & Field Location */}
+          <div className="space-y-3">
+            {/* 1. Field Location Section: Link to Monitored Plot */}
+            <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/90 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#257038]" />
+                  <span>Field Location / Monitored Plot</span>
+                </label>
+                {previousScan && (
+                  <span className="text-[10px] text-emerald-800 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                    Follow-up Scan #{previousScan.scanNumber + 1}
+                  </span>
+                )}
+              </div>
 
+              <select
+                value={linkedPlotId || ''}
+                onChange={(e) => {
+                  setLinkedPlotId(e.target.value);
+                  setSavedToHistory(false);
+                }}
+                className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038] shadow-2xs"
+              >
+                <option value="">Unmapped / Standalone New Scan</option>
+                <option value="wheat-field-a">Field A (Wheat • 2.4 acres) — Monitored Plot</option>
+                <option value="soybean-field-b">Field B (Soybean • 3.1 acres) — Monitored Plot</option>
+                <option value="tomato-field-c">Field C (Tomato • 1.2 acres) — Monitored Plot</option>
+                <option value="maize-field-d">Field D (Maize • 2.0 acres) — Monitored Plot</option>
+              </select>
 
-          {/* Date & Field Placeholders */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* If linked to monitored plot, field is the same */}
+              {linkedPlotId ? (
+                <div className="p-2 rounded-xl bg-white border border-emerald-200 text-xs text-emerald-950 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-[#154624]">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#257038]" />
+                    <span>Field Location: {plotDisplayName} (Linked Monitored Plot)</span>
+                  </div>
+                  {previousScan && (
+                    <p className="text-[11px] text-gray-600 pl-5">
+                      <strong>Previous Diagnosis ({previousScan.date}):</strong> {previousScan.diagnosis}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-[11px] text-gray-500 italic pl-1">
+                  Standalone scan. If you choose to add this scan to your farm dashboard, you will be asked for the field location after diagnosis.
+                </p>
+              )}
+            </div>
+
+            {/* 2. Observation Date - The ONLY date input kept */}
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5">
+              <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[#257038]" />
                 <span>Observation Date</span>
               </label>
@@ -357,66 +454,62 @@ export default function CropScanFeatureCard() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-[#257038]" />
-                <span>Field Location</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedField}
-                  onChange={(e) => setSelectedField(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-xs text-gray-800 font-medium focus:border-[#257038] focus:ring-1 focus:ring-[#257038] focus:outline-none shadow-xs pr-8"
-                >
-                  <option value="">Select Field...</option>
-                  {FIELD_OPTIONS.map((f) => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {/* 3. AI Auto-Scan Live Feedback */}
+            {isAutoDetecting && (
+              <div className="p-3 rounded-2xl bg-emerald-50/90 border border-emerald-300 flex items-center justify-between text-xs text-emerald-950 animate-pulse shadow-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#154624]">AI Auto-Scanning Crop & Growth Stage...</p>
+                    <p className="text-[10px] text-emerald-700">Analyzing leaf venation, color spectrum & morphology</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono text-emerald-800 font-bold bg-white px-2.5 py-1 rounded-full border border-emerald-200 shadow-2xs">
+                  Vision AI
+                </span>
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* Dropdowns for Crop & Stage */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                Crop Type <span className="text-green-700">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedCrop}
-                  onChange={(e) => setSelectedCrop(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-xs text-gray-800 font-medium focus:border-[#257038] focus:ring-1 focus:ring-[#257038] focus:outline-none shadow-xs pr-8"
-                >
-                  <option value="">Select Crop...</option>
-                  {CROP_OPTIONS.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {!isAutoDetecting && (detectedCropName || autoDetectStatus === 'detected') && (
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-green-50/80 to-emerald-50 border border-emerald-300 text-xs text-emerald-950 shadow-2xs space-y-1">
+                <div className="flex items-center justify-between flex-wrap gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-[#206332] text-white flex items-center justify-center text-[10px] font-black shadow-2xs">
+                      ✓
+                    </span>
+                    <span className="font-extrabold text-[#194b29] uppercase tracking-wider text-[11px]">
+                      Auto-Scanned from Photo:
+                    </span>
+                    <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-lg border border-emerald-200">
+                      {autoDetectResult?.cropIcon || '🌿'} {detectedCropName || 'Crop'}
+                    </span>
+                    <span className="text-gray-400">•</span>
+                    <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-lg border border-emerald-200">
+                      {autoDetectResult?.growthStageIcon || '🌱'} {detectedStageName || 'Active Growth'}
+                    </span>
+                  </div>
+                  {autoDetectResult?.confidence && (
+                    <span className="text-[10px] font-black text-emerald-900 bg-emerald-200/90 border border-emerald-300 px-2 py-0.5 rounded-full">
+                      {autoDetectResult.confidence}% Confidence
+                    </span>
+                  )}
+                </div>
+                {autoDetectResult?.reasoning && (
+                  <p className="text-[11px] text-emerald-900/80 pl-7 leading-snug">
+                    {autoDetectResult.reasoning}
+                  </p>
+                )}
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                Growth Stage <span className="text-green-700">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedStage}
-                  onChange={(e) => setSelectedStage(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-xs text-gray-800 font-medium focus:border-[#257038] focus:ring-1 focus:ring-[#257038] focus:outline-none shadow-xs pr-8"
-                >
-                  <option value="">Select Growth Stage...</option>
-                  {GROWTH_STAGES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {!isAutoDetecting && !detectedCropName && autoDetectStatus !== 'detected' && (
+              <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-600 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#257038] shrink-0" />
+                <span>Crop species & growth stage are <strong>auto-scanned by Gemini AI</strong> when photo is attached.</span>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Error notification */}
@@ -430,8 +523,8 @@ export default function CropScanFeatureCard() {
           {/* Scan Action Button */}
           <button
             onClick={runDiagnosis}
-            disabled={loading}
-            className="w-full py-3.5 rounded-full bg-[#257038] hover:bg-[#1e5c2e] disabled:bg-gray-400 text-white font-bold text-sm tracking-wide uppercase shadow-lg shadow-green-900/15 hover:shadow-green-900/25 transition-all duration-200 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+            disabled={loading || !previewUrl}
+            className="w-full py-3.5 rounded-full bg-[#257038] hover:bg-[#1e5c2e] disabled:bg-gray-300 text-white font-bold text-sm tracking-wide uppercase shadow-lg shadow-green-900/15 hover:shadow-green-900/25 transition-all duration-200 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? (
               <>
@@ -503,6 +596,20 @@ export default function CropScanFeatureCard() {
                         </span>
                       )}
                     </h3>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-600">
+                        Crop: <span className="font-semibold text-gray-900 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          {diagnosis.cropName || detectedCropName || 'Agricultural Crop'}
+                        </span>
+                      </span>
+                      {linkedPlotId && (
+                        <span className="text-xs text-gray-600">
+                          Field: <span className="font-semibold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200">
+                            📍 {plotDisplayName}
+                          </span>
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -582,7 +689,7 @@ export default function CropScanFeatureCard() {
                 </p>
               </div>
 
-              {/* 4. Precautions Protocol (सावधानियां) */}
+              {/* 4. Precautions Protocol */}
               <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/90 space-y-2">
                 <h4 className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-[#257038]" />
@@ -598,7 +705,7 @@ export default function CropScanFeatureCard() {
                 </div>
               </div>
 
-              {/* 5. Prevention & Dual-Track Remedies (रोकथाम एवं उपचार) */}
+              {/* 5. Prevention & Dual-Track Remedies */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 
                 {/* Organic Remedies */}
@@ -623,27 +730,155 @@ export default function CropScanFeatureCard() {
                 </div>
 
                 {/* Chemical Treatments */}
-                <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-gray-800/80 border border-amber-200/90 dark:border-gray-700 flex flex-col justify-between">
+                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/90 flex flex-col justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-amber-950 dark:text-amber-300 flex items-center gap-1.5 mb-2">
-                      <ShieldCheck className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                    <h4 className="text-xs font-bold text-amber-950 flex items-center gap-1.5 mb-2">
+                      <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                       <span>Recommended Fungicide / Spray (Chemical):</span>
                     </h4>
-                    <ul className="space-y-2 text-xs text-amber-950 dark:text-gray-200">
+                    <ul className="space-y-2 text-xs text-amber-950">
                       {diagnosis.chemicalRemedies.map((r, i) => (
-                        <li key={i} className="flex items-start gap-1.5 bg-white/90 dark:bg-gray-700/80 p-2 rounded-lg border border-amber-100 dark:border-gray-600 shadow-2xs">
-                          <Check className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+                        <li key={i} className="flex items-start gap-1.5 bg-white/90 p-2 rounded-lg border border-amber-100 shadow-2xs">
+                          <Check className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
                           <span className="text-[11px] font-medium leading-snug">{r}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="mt-2 text-[10px] text-amber-800 dark:text-amber-400 font-semibold">
-                    ⚠️ Adhere strictly to Pre-Harvest Interval (PHI) & protective gear
+                  <div className="mt-2 text-[10px] text-amber-800 font-semibold">
+                    ⚠️ Adhere strictly to Pre-Harvest Interval (PHI)
                   </div>
                 </div>
 
               </div>
+
+              {/* 6. Field Location Follow-Up / Registration Section */}
+              {linkedPlotId ? (
+                /* SECTION A: Monitored Plot Linked - Same Field confirmed */
+                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5 text-[#257038]" />
+                      <span>Linked Monitored Plot: {plotDisplayName}</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded border border-emerald-200">
+                      Field Location Same
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-900">
+                    This follow-up evaluation is paired with the historical diary for <strong>{plotDisplayName}</strong>.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={savedToHistory}
+                    onClick={handleSaveFollowUpScan}
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-60"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{savedToHistory ? '✓ Saved to Plot Health Diary!' : 'Save Follow-Up Scan to Health Diary'}</span>
+                  </button>
+                </div>
+              ) : (
+                /* SECTION B: Unmapped Scan - Ask for Field ONLY when farmer decides to add to dashboard */
+                <div className="space-y-3">
+                  {!savedNewFieldSuccess && !isAddingToDashboard && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-green-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                      <div>
+                        <p className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                          <Layers className="w-4 h-4 text-[#257038]" />
+                          <span>Add to Farm Dashboard</span>
+                        </p>
+                        <p className="text-[11px] text-gray-600 mt-0.5">
+                          Save this diagnosed crop as a monitored field to track recovery progress over time.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingToDashboard(true);
+                          setNewPlotFieldName(newPlotFieldName || 'Field E (New Plot)');
+                        }}
+                        className="px-4 py-2 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add as New Crop Field</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {!savedNewFieldSuccess && isAddingToDashboard && (
+                    <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-300 space-y-3 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold text-[#1a4d2e] uppercase tracking-wider flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-[#257038]" />
+                          <span>Assign Field Location</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingToDashboard(false)}
+                          className="text-gray-400 hover:text-gray-600 text-xs font-bold cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+
+                      <p className="text-[11px] text-gray-600 leading-snug">
+                        Specify the field location for this diagnosed <strong>{diagnosis.cropName || detectedCropName || 'Crop'}</strong> to add it to your farm dashboard:
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div className="sm:col-span-2">
+                          <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                            Field Name / Plot Location <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={newPlotFieldName}
+                            onChange={(e) => setNewPlotFieldName(e.target.value)}
+                            placeholder="e.g. Field E, North Acre, Polyhouse 1..."
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                            Plot Area (Acres)
+                          </label>
+                          <input
+                            type="text"
+                            value={newPlotAcres}
+                            onChange={(e) => setNewPlotAcres(e.target.value)}
+                            placeholder="e.g. 2.0"
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038]"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleSaveNewPlotToDashboard}
+                        className="w-full py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Save Field & Scan to Farm Dashboard</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {savedNewFieldSuccess && (
+                    <div className="p-3.5 rounded-xl bg-emerald-100/90 border border-emerald-300 text-xs text-emerald-950 flex items-center justify-between shadow-2xs">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                        <span>
+                          <strong>{newPlotFieldName} ({newPlotAcres} acres)</strong> added to your Farm Dashboard!
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                        Monitored Active
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
             </div>
           ) : (
@@ -655,7 +890,7 @@ export default function CropScanFeatureCard() {
                 Diagnostic Report Canvas
               </h3>
               <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                Upload a leaf photo or pick a grounded benchmark sample on the left, then click <strong>Run Instant AI Disease Diagnosis</strong> to view the laboratory-grade pathology report.
+                Upload a leaf photo on the left. The AI will automatically identify the crop species and growth stage, then diagnose pathology upon running the scan.
               </p>
             </div>
           )}
