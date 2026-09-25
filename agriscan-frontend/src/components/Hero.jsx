@@ -1,7 +1,10 @@
 import React from 'react';
 import { Camera, Play, Sparkles, CheckCircle2, ShieldCheck, Zap, Activity, CloudSun } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Hero({ onOpenScan, onOpenDemo }) {
+  const { t } = useLanguage();
+
   return (
     <section id="home" className="relative pt-6 pb-20 md:pt-10 md:pb-28 overflow-hidden">
       
@@ -16,16 +19,17 @@ export default function Hero({ onOpenScan, onOpenDemo }) {
             
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-100/90 border border-green-200 text-[#206332] text-xs font-semibold tracking-wide uppercase shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-[#257038]" />
-              <span>AI Crop Diagnosis • Progressive Tracking • Weather Sync</span>
+              <span>{t('hero_badge')}</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-[#11291c] font-display uppercase tracking-tight leading-[1.08]">
-              INSTANT CROP DIAGNOSIS.<br />
-              SMARTER FARMING.
+              {t('hero_heading1')}<br />
+              {t('hero_heading2')}<br />
+              {t('hero_heading3')}
             </h1>
 
             <p className="text-base sm:text-lg text-gray-600 max-w-xl font-normal leading-relaxed">
-              Kisan Rakshak uses your smartphone to detect plant disease and provide expert treatment solutions in seconds. Save your harvest with advanced technology.
+              {t('hero_subtitle')}
             </p>
 
             {/* Action Buttons matching reference */}
@@ -34,7 +38,7 @@ export default function Hero({ onOpenScan, onOpenDemo }) {
                 onClick={onOpenScan}
                 className="group relative inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-[#257038] hover:bg-[#1e5c2e] text-white font-semibold text-base shadow-lg shadow-green-800/20 hover:shadow-green-800/30 transition-all duration-200 active:scale-95 cursor-pointer"
               >
-                <span>Scan My Crops</span>
+                <span>{t('hero_scanBtn')}</span>
                 <Camera className="w-4 h-4 ml-2.5 opacity-90 group-hover:scale-110 transition-transform" />
               </button>
 
@@ -43,7 +47,7 @@ export default function Hero({ onOpenScan, onOpenDemo }) {
                 className="inline-flex items-center justify-center px-8 py-3.5 rounded-full border-[1.8px] border-[#257038] text-[#257038] bg-white/90 hover:bg-[#257038] hover:text-white font-semibold text-base transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md backdrop-blur-sm cursor-pointer"
               >
                 <Play className="w-4 h-4 mr-2.5 fill-current" />
-                <span>Watch Demo</span>
+                <span>{t('hero_demoBtn')}</span>
               </button>
             </div>
 
@@ -51,15 +55,15 @@ export default function Hero({ onOpenScan, onOpenDemo }) {
             <div className="pt-2 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs text-gray-600 font-medium">
               <div className="flex items-center gap-2 p-2 rounded-xl bg-white/70 border border-green-100/60 shadow-xs">
                 <CheckCircle2 className="w-4 h-4 text-[#257038] shrink-0" />
-                <span>98.4% Precision</span>
+                <span>{t('hero_stat1')}</span>
               </div>
               <div className="flex items-center gap-2 p-2 rounded-xl bg-white/70 border border-green-100/60 shadow-xs">
                 <Activity className="w-4 h-4 text-[#257038] shrink-0" />
-                <span>Progressive Tracking</span>
+                <span>{t('hero_stat2')}</span>
               </div>
               <div className="flex items-center gap-2 p-2 rounded-xl bg-white/70 border border-green-100/60 shadow-xs col-span-2 sm:col-span-1">
                 <CloudSun className="w-4 h-4 text-[#257038] shrink-0" />
-                <span>Weather Disease Sync</span>
+                <span>{t('hero_stat3')}</span>
               </div>
             </div>
 

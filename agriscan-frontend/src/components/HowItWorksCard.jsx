@@ -1,7 +1,10 @@
 import React from 'react';
 import { Camera, Cpu, FileCheck2, ChevronRight, Target, UserCheck, History, Sprout, Check, Database } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
+  const { t } = useLanguage();
+
   return (
     <section id="how-it-works" className="relative pt-6 sm:pt-10 z-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pb-12">
       
@@ -11,10 +14,10 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
         {/* Section Title */}
         <div className="text-center mb-10 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#11291c] font-display tracking-tight">
-            How Kisan Rakshak Works
+            {t('hiw_title')}
           </h2>
           <p className="text-sm text-gray-500 mt-1.5 font-medium">
-            3 simple steps from leaf photo to actionable treatment
+            {t('hiw_subtitle')}
           </p>
         </div>
 
@@ -36,15 +39,15 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                 </div>
 
                 <span className="text-[11px] font-bold uppercase tracking-wider text-green-700 bg-white/80 px-2.5 py-1 rounded-full border border-green-200">
-                  Step 01
+                  {t('hiw_step1_badge')}
                 </span>
               </div>
 
               <h3 className="font-extrabold text-[#132c1c] text-base sm:text-lg tracking-tight mb-1">
-                [1] SNAP A PHOTO
+                {t('hiw_step1_title')}
               </h3>
               <p className="text-xs sm:text-sm text-gray-600 font-medium leading-snug mb-5">
-                Smartphone highlighting leaf
+                {t('hiw_step1_desc')}
               </p>
             </div>
 
@@ -65,7 +68,7 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                   <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-emerald-400" />
                   <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-400" />
                   <span className="text-[10px] text-emerald-300 font-mono font-bold bg-black/60 px-1.5 py-0.5 rounded">
-                    FOCUS: LEAF
+                    {t('hiw_step1_focus')}
                   </span>
                 </div>
               </div>
@@ -95,15 +98,15 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                 </div>
 
                 <span className="text-[11px] font-bold uppercase tracking-wider text-green-700 bg-white/80 px-2.5 py-1 rounded-full border border-green-200">
-                  Step 02
+                  {t('hiw_step2_badge')}
                 </span>
               </div>
 
               <h3 className="font-extrabold text-[#132c1c] text-base sm:text-lg tracking-tight mb-1">
-                [2] AI ANALYSIS
+                {t('hiw_step2_title')}
               </h3>
               <p className="text-xs sm:text-sm text-gray-600 font-medium leading-snug mb-5">
-                Processing with identification in progress
+                {t('hiw_step2_desc')}
               </p>
             </div>
 
@@ -122,16 +125,16 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                     <div className="h-full bg-gradient-to-r from-emerald-500 to-green-300 w-3/4 rounded-full animate-pulse" />
                   </div>
                   <p className="text-[10px] text-emerald-300 font-semibold">
-                    Neural Pattern Matching...
+                    {t('hiw_step2_matching')}
                   </p>
                   <p className="text-[8.5px] text-emerald-400/80 font-mono">
-                    50,000+ Plant Models
+                    {t('hiw_step2_models')}
                   </p>
                 </div>
               </div>
 
               <div className="py-1.5 flex items-center justify-center">
-                <span className="text-[8.5px] text-gray-400 font-mono">Kisan Rakshak Core v3.4</span>
+                <span className="text-[8.5px] text-gray-400 font-mono">{t('hiw_step2_core')}</span>
               </div>
             </div>
 
@@ -153,15 +156,15 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                 </div>
 
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
-                  Step 03
+                  {t('hiw_step3_badge')}
                 </span>
               </div>
 
               <h3 className="font-extrabold text-[#132c1c] text-base sm:text-lg tracking-tight mb-1">
-                [3] GET SOLUTIONS
+                {t('hiw_step3_title')}
               </h3>
               <p className="text-xs sm:text-sm text-gray-600 font-medium leading-snug mb-5">
-                Clear report with specific diagnosis and treatments
+                {t('hiw_step3_desc')}
               </p>
             </div>
 
@@ -172,14 +175,14 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
               <div className="relative flex-1 rounded-[16px] overflow-hidden bg-white p-2.5 flex flex-col justify-between text-left">
                 <div>
                   <div className="flex items-center justify-between border-b border-gray-100 pb-1 mb-1">
-                    <span className="text-[9px] font-bold text-gray-800">Scan Report</span>
+                    <span className="text-[9px] font-bold text-gray-800">{t('hiw_scanReport')}</span>
                     <span className="text-[7.5px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
-                      84% Match
+                      {t('hiw_match')}
                     </span>
                   </div>
 
                   <p className="text-[11px] font-extrabold text-red-700 leading-tight">
-                    Early Blight
+                    {t('hiw_earlyBlight')}
                   </p>
                   <p className="text-[8px] text-gray-500 mb-1.5">
                     Alternaria solani
@@ -188,22 +191,22 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                   <div className="space-y-1">
                     <div className="flex items-start gap-1">
                       <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span className="text-[7.5px] text-gray-700 leading-tight">Copper Octanoate Spray</span>
+                      <span className="text-[7.5px] text-gray-700 leading-tight">{t('hiw_spray')}</span>
                     </div>
                     <div className="flex items-start gap-1">
                       <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span className="text-[7.5px] text-gray-700 leading-tight">Sanitize lower canopy</span>
+                      <span className="text-[7.5px] text-gray-700 leading-tight">{t('hiw_sanitize')}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="bg-green-50 p-1 rounded-lg border border-green-200 text-center">
-                  <span className="text-[7.5px] font-bold text-green-800">Save 95% Crop Yield</span>
+                  <span className="text-[7.5px] font-bold text-green-800">{t('hiw_saveYield')}</span>
                 </div>
               </div>
 
               <div className="py-1.5 flex items-center justify-center">
-                <span className="text-[8.5px] text-gray-400 font-mono">Expert Verified</span>
+                <span className="text-[8.5px] text-gray-400 font-mono">{t('hiw_expertVerified')}</span>
               </div>
             </div>
           </div>
@@ -215,10 +218,10 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
         <div className="mt-14 pt-10 border-t border-gray-100">
           <div className="text-center mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-[#11291c] font-display">
-              Key Benefits
+              {t('benefits_title')}
             </h3>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Field-tested by agronomists to protect crops and maximize harvest yields
+              {t('benefits_subtitle')}
             </p>
           </div>
 
@@ -233,10 +236,10 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                 <Target className="w-7 h-7" />
               </div>
               <h4 className="font-bold text-gray-900 text-sm sm:text-base group-hover:text-[#257038] transition-colors">
-                Instant Diagnosis
+                {t('benefit1_title')}
               </h4>
               <p className="text-xs text-gray-500 mt-1 hidden sm:block">
-                Sub-3-second results with high precision
+                {t('benefit1_desc')}
               </p>
             </div>
 
@@ -248,10 +251,10 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                 <UserCheck className="w-7 h-7" />
               </div>
               <h4 className="font-bold text-gray-900 text-sm sm:text-base group-hover:text-[#257038] transition-colors">
-                Expert Advice
+                {t('benefit2_title')}
               </h4>
               <p className="text-xs text-gray-500 mt-1 hidden sm:block">
-                Agronomist-validated treatment protocols
+                {t('benefit2_desc')}
               </p>
             </div>
 
@@ -263,10 +266,10 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                 <History className="w-7 h-7" />
               </div>
               <h4 className="font-bold text-gray-900 text-sm sm:text-base group-hover:text-[#257038] transition-colors">
-                Crop History
+                {t('benefit3_title')}
               </h4>
               <p className="text-xs text-gray-500 mt-1 hidden sm:block">
-                Progressive multi-scan recovery timeline
+                {t('benefit3_desc')}
               </p>
             </div>
 
@@ -278,10 +281,10 @@ export default function HowItWorksCard({ onOpenScan, onSelectBenefit }) {
                 <Sprout className="w-7 h-7" />
               </div>
               <h4 className="font-bold text-gray-900 text-sm sm:text-base group-hover:text-[#257038] transition-colors">
-                50+ Supported Crops
+                {t('benefit4_title')}
               </h4>
               <p className="text-xs text-gray-500 mt-1 hidden sm:block">
-                Vegetables, fruits, cereals & grains
+                {t('benefit4_desc')}
               </p>
             </div>
 
