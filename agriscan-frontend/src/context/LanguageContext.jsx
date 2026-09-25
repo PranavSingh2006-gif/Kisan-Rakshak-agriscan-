@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 export const LANGUAGES = [
   { code: 'en', label: 'EN', full: 'English' },
@@ -546,67 +546,6 @@ export function LanguageProvider({ children }) {
     }
     return keyOrText;
   };
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-
-    const translateDOM = () => {
-      if (lang === 'en') {
-        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
-        let node;
-        while ((node = walker.nextNode())) {
-          if (node._originalEn) {
-            node.nodeValue = node._originalEn;
-          }
-        }
-        return;
-      }
-
-      const map = PHRASE_MAP[lang];
-      if (!map) return;
-
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-        acceptNode: (n) => {
-          const parent = n.parentElement;
-          if (!parent) return NodeFilter.FILTER_REJECT;
-          const tag = parent.tagName.toLowerCase();
-          if (tag === 'script' || tag === 'style' || tag === 'input' || tag === 'textarea') {
-            return NodeFilter.FILTER_REJECT;
-          }
-          return NodeFilter.FILTER_ACCEPT;
-        }
-      });
-
-      let node;
-      while ((node = walker.nextNode())) {
-        const raw = node.nodeValue;
-        if (!raw) continue;
-        const trimmed = raw.trim();
-        if (!trimmed) continue;
-
-        if (!node._originalEn) {
-          node._originalEn = raw;
-        }
-
-        const enTrimmed = node._originalEn.trim();
-        if (map[enTrimmed]) {
-          const replacement = map[enTrimmed];
-          node.nodeValue = node._originalEn.replace(enTrimmed, replacement);
-        }
-      }
-    };
-
-    translateDOM();
-
-    const observer = new MutationObserver(() => {
-      translateDOM();
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-
-    return () => observer.disconnect();
-  }, [lang]);
-
   return (
     <LanguageContext.Provider value={{ lang, setLang: handleSetLang, t }}>
       {children}
