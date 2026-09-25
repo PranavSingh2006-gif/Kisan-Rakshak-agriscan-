@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Menu, X, Leaf, Bot, Globe } from 'lucide-react';
 import { useLanguage, LANGUAGES } from '../context/LanguageContext';
 
@@ -32,7 +32,7 @@ export default function Navbar({ onOpenScan, onNavigate, currentPath = '/' }) {
   const handleHowItWorksClick = (e) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    if (isFeatures || isAssistant) {
+    if (!isHome) {
       if (onNavigate) onNavigate('/');
       setTimeout(() => {
         const el = document.getElementById('how-it-works');

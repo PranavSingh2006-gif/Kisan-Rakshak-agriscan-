@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export const LANGUAGES = [
   { code: 'en', label: 'EN', full: 'English' },
@@ -37,6 +37,9 @@ export const TRANSLATIONS = {
     hiw_step2_badge: 'Step 02',
     hiw_step2_title: '[2] AI ANALYSIS',
     hiw_step2_desc: 'Processing with identification in progress',
+    hiw_step2_matching: 'Neural Pattern Matching...',
+    hiw_step2_models: '50,000+ Plant Models',
+    hiw_step2_core: 'Kisan Rakshak Core v3.4',
     hiw_step3_badge: 'Step 03',
     hiw_step3_title: '[3] GET SOLUTIONS',
     hiw_step3_desc: 'Clear report with specific diagnosis and treatments',
@@ -145,6 +148,9 @@ export const TRANSLATIONS = {
     hiw_step2_badge: 'चरण 02',
     hiw_step2_title: '[2] AI विश्लेषण',
     hiw_step2_desc: 'पहचान और विश्लेषण प्रगति पर है',
+    hiw_step2_matching: 'न्यूरल पैटर्न मिलान...',
+    hiw_step2_models: '50,000+ पौधे मॉडल',
+    hiw_step2_core: 'किसान रक्षक कोर v3.4',
     hiw_step3_badge: 'चरण 03',
     hiw_step3_title: '[3] समाधान प्राप्त करें',
     hiw_step3_desc: 'सटीक निदान और उपचार के साथ विस्तृत रिपोर्ट',
@@ -253,6 +259,9 @@ export const TRANSLATIONS = {
     hiw_step2_badge: 'पायरी 02',
     hiw_step2_title: '[2] AI विश्लेषण',
     hiw_step2_desc: 'ओळख आणि विश्लेषण सुरू आहे',
+    hiw_step2_matching: 'न्यूरल पॅटर्न जुळणी...',
+    hiw_step2_models: '50,000+ वनस्पती मॉडेल',
+    hiw_step2_core: 'किसान रक्षक कोर v3.4',
     hiw_step3_badge: 'पायरी 03',
     hiw_step3_title: '[3] उपाय मिळवा',
     hiw_step3_desc: 'अचूक निदान आणि उपचारांसह सविस्तर अहवाल',
@@ -534,7 +543,8 @@ export function LanguageProvider({ children }) {
   };
 
   const t = (keyOrText) => {
-    if (!keyOrText) return '';
+    if (keyOrText === null || keyOrText === undefined) return '';
+    if (typeof keyOrText !== 'string') return keyOrText;
     if (TRANSLATIONS[lang] && TRANSLATIONS[lang][keyOrText] !== undefined) {
       return TRANSLATIONS[lang][keyOrText];
     }
@@ -546,6 +556,7 @@ export function LanguageProvider({ children }) {
     }
     return keyOrText;
   };
+
   return (
     <LanguageContext.Provider value={{ lang, setLang: handleSetLang, t }}>
       {children}

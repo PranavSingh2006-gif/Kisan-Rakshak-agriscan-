@@ -326,19 +326,25 @@ Return ONLY the raw JSON object, no Markdown, no codeblocks.`;
 
 // KisanRakshak AI Chat Assistant Endpoint
 app.post('/api/chat-assistant', async (req, res) => {
-  const { message = '', chatHistory = [] } = req.body;
-  console.log(`[Chat Assistant Request]: ${message}`);
+  const { message = '', chatHistory = [], lang = 'en' } = req.body;
+  console.log(`[Chat Assistant Request] (lang: ${lang}): ${message}`);
 
   if (!message || !message.trim()) {
     return res.status(400).json({ error: 'Message cannot be empty' });
   }
+
+  const langInstruction = lang === 'hi' 
+    ? 'Respond in clear, polite Hindi (हिंदी).'
+    : lang === 'mr'
+    ? 'Respond in clear, polite Marathi (मराठी).'
+    : 'Provide advice in simple English, with Hindi terms in parentheses when relevant (e.g. झुलसा, तना छेदक).';
 
   const systemInstruction = `You are "KisanRakshak Assistant", an empathetic, highly knowledgeable agricultural plant pathology and pest management expert for farmers in India.
 Your role:
 1. Help farmers diagnose crop diseases, insect pests, nutrient deficiencies, and weather risks.
 2. Provide concise, actionable, and practical guidance.
 3. Suggest inspecting leaves, stems, and roots, and recommend taking a photo using "Diagnose My Crop" for laboratory-grade AI image diagnosis.
-4. Provide advice in simple English, with Hindi terms in parentheses when relevant (e.g. झुलसा, तना छेदक).
+4. ${langInstruction}
 5. Always advise safety when using agrochemicals and prioritize organic / bio-rational solutions.`;
 
   // Try Gemini models
@@ -357,12 +363,33 @@ Your role:
   // Fallback agronomy response if Gemini API key quota is reached
   const lower = message.toLowerCase();
   let fallbackReply = "I recommend closely inspecting the underside of the leaves and stem margins for discoloration or powdery spores. For exact laboratory-grade disease identification, please click 'Diagnose My Crop' to scan a clear photo.";
-  if (lower.includes('tomato') || lower.includes('spot')) {
-    fallbackReply = "Tomato leaf spots are commonly caused by Early Blight (Alternaria) or Septoria leaf spot. Avoid overhead watering to keep foliage dry, prune infected lower leaves, and upload a clear photo using 'Diagnose My Crop' for exact confirmation.";
-  } else if (lower.includes('wheat') || lower.includes('rust') || lower.includes('yellow')) {
-    fallbackReply = "Yellowing in wheat can indicate Stripe/Yellow Rust or nitrogen deficiency. Check if yellow pustules rub off on your fingers as powdery dust. Upload a leaf close-up using 'Diagnose My Crop' to get specific fungicide/organic dosages.";
-  } else if (lower.includes('rice') || lower.includes('paddy')) {
-    fallbackReply = "Rice crops frequently face Bacterial Leaf Blight or Blast under humid conditions. Avoid excess nitrogen top-dressing and drain stagnant standing water. Use 'Diagnose My Crop' with a leaf snapshot for instant pathogen matching.";
+  
+  if (lang === 'hi') {
+    fallbackReply = "मैं पत्तियों के निचले हिस्से और तने के किनारों पर रंग उड़ने या फफूंद के बीजाणुओं की बारीकी से जांच करने की सलाह देता हूँ। सटीक प्रयोगशाला-स्तरीय रोग पहचान के लिए, कृपया 'मेरी फसल का निदान करें' पर क्लिक करके एक स्पष्ट तस्वीर स्कैन करें।";
+    if (lower.includes('tomato') || lower.includes('spot') || lower.includes('टमाटर')) {
+      fallbackReply = "टमाटर के पत्तों पर धब्बे आमतौर पर अगेती झुलसा (अर्ली ब्लाइट) या सेप्टोरिया लीफ स्पॉट के कारण होते हैं। पत्तियों को सूखा रखने के लिए ऊपर से पानी देने से बचें, संक्रमित निचली पत्तियों को काट दें और सटीक पुष्टि के लिए 'मेरी फसल का निदान करें' का उपयोग करें।";
+    } else if (lower.includes('wheat') || lower.includes('rust') || lower.includes('yellow') || lower.includes('गेहूं')) {
+      fallbackReply = "गेहूं में पीलापन पीला रतुआ (येलो रस्ट) या नाइट्रोजन की कमी का संकेत हो सकता है। जांचें कि क्या पीले दाने उंगलियों पर पाउडर की तरह छूटते हैं। सही कवकनाशी या जैविक खुराक पाने के लिए 'मेरी फसल का निदान करें' से स्कैन करें।";
+    } else if (lower.includes('rice') || lower.includes('paddy') || lower.includes('धान')) {
+      fallbackReply = "धान की फसल में आर्द्र मौसम में अक्सर जीवाणु झुलसा (बैक्टीरियल ब्लाइट) या ब्लास्ट रोग होता है। अधिक नाइट्रोजन डालने से बचें और खेत से रुका हुआ पानी निकालें। तत्काल रोग पहचान के लिए 'मेरी फसल का निदान करें' का उपयोग करें।";
+    }
+  } else if (lang === 'mr') {
+    fallbackReply = "मी पानाच्या खालच्या बाजूला आणि खोडाच्या कडांवर बुरशी किंवा डागांची बारकाईने तपासणी करण्याचा सल्ला देतो. अचूक रोग निदानासाठी, कृपया 'माझ्या पिकाचे निदान करा' वर क्लिक करून स्पष्ट फोटो स्कॅन करा.";
+    if (lower.includes('tomato') || lower.includes('spot') || lower.includes('टोमॅटो')) {
+      fallbackReply = "टोमॅटोच्या पानांवरील डाग सामान्यतः करपा (अर्ली ब्लाइट) किंवा सेप्टोरियामुळे होतात. झाडांवर वरून पाणी देणे टाळा, रोगट पाने काढून टाका आणि अचूक निदानासाठी 'माझ्या पिकाचे निदान करा' वापरा.";
+    } else if (lower.includes('wheat') || lower.includes('rust') || lower.includes('yellow') || lower.includes('गहू')) {
+      fallbackReply = "गव्हामधील पिवळेपणा तांबेरा (येलो रस्ट) किंवा नायट्रोजनच्या कमतरतेचे लक्षण असू शकते. बोटांवर पिवळी पावडर लागते का ते तपासा. अचूक उपायांसाठी 'माझ्या पिकाचे निदान करा' द्वारे फोटो स्कॅन करा.";
+    } else if (lower.includes('rice') || lower.includes('paddy') || lower.includes('भात')) {
+      fallbackReply = "भात पिकामध्ये दमट हवेमुळे करपा किंवा जिवाणू करपा रोग होण्याची शक्यता असते. जास्त युरिया देणे टाळा आणि साचलेले पाणी काढून टाका. तात्काळ निदानासाठी 'माझ्या पिकाचे निदान करा' वापरा.";
+    }
+  } else {
+    if (lower.includes('tomato') || lower.includes('spot')) {
+      fallbackReply = "Tomato leaf spots are commonly caused by Early Blight (Alternaria) or Septoria leaf spot. Avoid overhead watering to keep foliage dry, prune infected lower leaves, and upload a clear photo using 'Diagnose My Crop' for exact confirmation.";
+    } else if (lower.includes('wheat') || lower.includes('rust') || lower.includes('yellow')) {
+      fallbackReply = "Yellowing in wheat can indicate Stripe/Yellow Rust or nitrogen deficiency. Check if yellow pustules rub off on your fingers as powdery dust. Upload a leaf close-up using 'Diagnose My Crop' to get specific fungicide/organic dosages.";
+    } else if (lower.includes('rice') || lower.includes('paddy')) {
+      fallbackReply = "Rice crops frequently face Bacterial Leaf Blight or Blast under humid conditions. Avoid excess nitrogen top-dressing and drain stagnant standing water. Use 'Diagnose My Crop' with a leaf snapshot for instant pathogen matching.";
+    }
   }
 
   return res.json({

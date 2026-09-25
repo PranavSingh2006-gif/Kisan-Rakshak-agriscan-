@@ -1,20 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Send, Sparkles, User, Bot, Loader2, CheckCircle2 } from 'lucide-react';
 import Footer from '../Footer';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function AIAssistantPage({ onOpenScan, onNavigate }) {
+  const { lang, t } = useLanguage();
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: 'Share your crop, growth stage, affected plant part and a clear photo. I can help you decide what to inspect next.'
+      text: lang === 'hi' 
+        ? 'अपनी फसल, वृद्धि का चरण, प्रभावित भाग और एक स्पष्ट तस्वीर साझा करें। मैं आपको आगे क्या जांचना है यह तय करने में मदद करूँगा।'
+        : lang === 'mr'
+        ? 'तुमचे पीक, वाढीचा टप्पा, बाधित भाग आणि स्पष्ट फोटो शेअर करा. पुढे काय तपासावे हे ठरवण्यात मी तुम्हाला मदत करू शकेन.'
+        : 'Share your crop, growth stage, affected plant part and a clear photo. I can help you decide what to inspect next.'
     },
     {
       sender: 'user',
-      text: 'My tomato leaves have spots.'
+      text: lang === 'hi' ? 'मेरे टमाटर के पत्तों पर धब्बे हैं।' : lang === 'mr' ? 'माझ्या टोमॅटोच्या पानांवर डाग आहेत.' : 'My tomato leaves have spots.'
     },
     {
       sender: 'bot',
-      text: 'Upload a clear photo using Diagnose My Crop for AI-assisted analysis.'
+      text: lang === 'hi'
+        ? 'AI-आधारित विश्लेषण के लिए "मेरी फसल का निदान करें" बटन से एक स्पष्ट फोटो अपलोड करें।'
+        : lang === 'mr'
+        ? 'AI-आधारित विश्लेषणासाठी "माझ्या पिकाचे निदान करा" बटण वापरून स्पष्ट फोटो अपलोड करा.'
+        : 'Upload a clear photo using Diagnose My Crop for AI-assisted analysis.'
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -42,7 +52,7 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
       const res = await fetch('http://localhost:5000/api/chat-assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: query.trim() })
+        body: JSON.stringify({ message: query.trim(), lang })
       });
 
       if (res.ok) {
@@ -53,7 +63,11 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
           ...prev,
           {
             sender: 'bot',
-            text: 'I recommend inspecting the underside of the leaf for discoloration or spore dust. Use "Diagnose My Crop" to scan a leaf photo for automated diagnosis.'
+            text: lang === 'hi'
+              ? 'मैं पत्ती के निचले हिस्से में रंग उड़ने या फफूंद के बीजाणुओं की जांच करने की सलाह देता हूँ। स्वचालित निदान के लिए "मेरी फसल का निदान करें" से पत्ती की फोटो स्कैन करें।'
+              : lang === 'mr'
+              ? 'मी पानाच्या खालच्या बाजूला बुरशी किंवा डागांची तपासणी करण्याचा सल्ला देतो. स्वयंचलित निदानासाठी "माझ्या पिकाचे निदान करा" वापरून पाण्याचा फोटो स्कॅन करा.'
+              : 'I recommend inspecting the underside of the leaf for discoloration or spore dust. Use "Diagnose My Crop" to scan a leaf photo for automated diagnosis.'
           }
         ]);
       }
@@ -62,7 +76,11 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
         ...prev,
         {
           sender: 'bot',
-          text: 'Inspect leaf spots carefully for concentric rings or yellow halos. You can take a clear snapshot with "Diagnose My Crop" for laboratory-grade diagnosis.'
+          text: lang === 'hi'
+            ? 'पत्ती के धब्बों में छल्लों या पीले घेरों की ध्यान से जांच करें। प्रयोगशाला-स्तरीय निदान के लिए "मेरी फसल का निदान करें" से फोटो लें।'
+            : lang === 'mr'
+            ? 'पानावरील डागांची काळजीपूर्वक तपासणी करा. प्रयोगशाळा-दर्जाच्या निदानासाठी "माझ्या पिकाचे निदान करा" वापरून फोटो घ्या.'
+            : 'Inspect leaf spots carefully for concentric rings or yellow halos. You can take a clear snapshot with "Diagnose My Crop" for laboratory-grade diagnosis.'
         }
       ]);
     } finally {
@@ -105,13 +123,13 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <span className="text-[11px] font-extrabold tracking-widest text-emerald-800 uppercase font-mono">
-                HUMAN + DIGITAL SUPPORT
+                {t('ai_support') || 'HUMAN + DIGITAL SUPPORT'}
               </span>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-[#11291c] tracking-tight font-display mt-0.5">
-                Ask a Pest Control Expert
+                {t('ai_expertTitle') || 'Ask a Pest Control Expert'}
               </h1>
               <p className="text-sm sm:text-base text-gray-700 mt-1 max-w-2xl leading-relaxed font-medium">
-                Describe the symptom or upload a crop photo. The platform combines guided triage with expert support.
+                {t('ai_expertSubtitle') || 'Describe the symptom or upload a crop photo. The platform combines guided triage with expert support.'}
               </p>
             </div>
 
@@ -121,7 +139,7 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
               className="self-start sm:self-center flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#257038] hover:bg-[#1e5c2e] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer shrink-0"
             >
               <Camera className="w-4 h-4" />
-              <span>Diagnose My Crop</span>
+              <span>{t('ai_diagnoseCrop')}</span>
             </button>
           </div>
 
@@ -137,10 +155,10 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
 
                 <div>
                   <h2 className="text-xl font-extrabold text-gray-900">
-                    Farmer Dashboard
+                    {t('ai_farmerDashboard') || 'Farmer Dashboard'}
                   </h2>
                   <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                    Talk to an agriculture expert about a crop or pest problem.
+                    {t('ai_farmerDesc') || 'Talk to an agriculture expert about a crop or pest problem.'}
                   </p>
                 </div>
 
@@ -180,7 +198,7 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>Online</span>
+                    <span>{t('Online')}</span>
                   </div>
                 </div>
 
@@ -207,7 +225,7 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
                     <div className="flex justify-start">
                       <div className="bg-[#e7f0e7] px-4 py-3 rounded-2xl rounded-bl-xs border border-green-100 flex items-center gap-2 text-xs text-gray-600">
                         <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-                        <span>KisanRakshak is analyzing...</span>
+                        <span>{t('ai_analyzing')}</span>
                       </div>
                     </div>
                   )}
@@ -223,7 +241,7 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder="Type your question..."
+                      placeholder={t('ai_typeQuestion')}
                       className="flex-1 text-xs sm:text-sm bg-transparent border-none focus:outline-none text-gray-800 placeholder-gray-400"
                     />
                     <button
@@ -232,7 +250,7 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
                       className="px-4 py-1.5 rounded-lg bg-[#257038] hover:bg-[#1e5c2e] disabled:opacity-40 disabled:hover:bg-[#257038] text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      <span>Send</span>
+                      <span>{t('ai_send')}</span>
                     </button>
                   </div>
                 </div>

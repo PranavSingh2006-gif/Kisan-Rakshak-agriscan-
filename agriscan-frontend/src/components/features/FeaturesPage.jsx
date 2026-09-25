@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Camera, CloudSun, MapPin, Sparkles } from 'lucide-react';
 import CropScanFeatureCard from './CropScanFeatureCard';
 import WeatherForecastFeatureCard from './WeatherForecastFeatureCard';
@@ -28,33 +28,33 @@ export default function FeaturesPage({ onNavigate, onOpenScan }) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 overflow-x-auto">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-gray-600 uppercase tracking-wider hidden sm:inline">
-              Sections:
+              {t('fp_sections')}
             </span>
             <button
               onClick={() => scrollToSection('scan')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700 hover:text-[#257038] bg-green-50 hover:bg-green-100 transition-all cursor-pointer whitespace-nowrap"
             >
               <Camera className="w-3.5 h-3.5 text-[#257038]" />
-              <span>1. Crop Scan</span>
+              <span>{t('fp_tab1')}</span>
             </button>
             <button
               onClick={() => scrollToSection('weather')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700 hover:text-[#257038] bg-amber-50 hover:bg-amber-100 transition-all cursor-pointer whitespace-nowrap"
             >
               <CloudSun className="w-3.5 h-3.5 text-amber-600" />
-              <span>2. Weather Forecast</span>
+              <span>{t('fp_tab2')}</span>
             </button>
             <button
               onClick={() => scrollToSection('surveillance')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700 hover:text-[#257038] bg-red-50 hover:bg-red-100 transition-all cursor-pointer whitespace-nowrap"
             >
               <MapPin className="w-3.5 h-3.5 text-red-600" />
-              <span>3. UP Disease Radar</span>
+              <span>{t('fp_tab3')}</span>
             </button>
           </div>
 
           <div className="text-[11px] font-bold text-[#257038] uppercase tracking-wide hidden md:block font-mono">
-            Kisan Rakshak Precision Suite
+            {t('fp_precisionSuite')}
           </div>
         </div>
       </div>
@@ -81,7 +81,7 @@ export default function FeaturesPage({ onNavigate, onOpenScan }) {
               <span>{t('fp_suite')}</span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#11291c] font-display uppercase tracking-tight drop-shadow-2xs">
-              Kisan Rakshak Platform Features
+              {t('fp_title')}
             </h1>
             <p className="text-sm sm:text-base text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
               {t('fp_subtitle')}

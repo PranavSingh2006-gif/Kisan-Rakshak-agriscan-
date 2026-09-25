@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X, Upload, CheckCircle2, AlertTriangle, ShieldCheck, Leaf, RefreshCw,
   Sparkles, ChevronDown, Check, ShieldAlert, Info, CloudSun, Calendar, MapPin, Plus,
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { cropDatabase } from '../../data/cropData';
 import { getAllPlotHistories, getPlotHistory, appendScanToHistory, evaluateFollowUpOutcome } from '../../data/progressiveScanHistory';
+import { useLanguage } from '../../context/LanguageContext';
 
 const CROP_OPTIONS = [
   { id: 'tomato', name: 'Tomato', icon: '🍅' },
@@ -35,6 +36,7 @@ function ScanFormFields({
   linkedPlotId, handleSelectPlot, previousScan,
   isAutoDetecting
 }) {
+  const { t } = useLanguage();
   return (
     <div className="space-y-3">
       {/* Field Location: Link to Monitored Plot */}
@@ -42,7 +44,7 @@ function ScanFormFields({
         <div className="flex items-center justify-between">
           <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
             <RefreshCw className="w-3.5 h-3.5 text-[#257038]" />
-            <span>Field Location / Monitored Plot</span>
+            <span>{t('sm_fieldLocation') || t('Field Location / Monitored Plot')}</span>
           </label>
           {previousScan && (
             <span className="text-[10px] text-emerald-800 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
@@ -56,10 +58,10 @@ function ScanFormFields({
           className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038]"
         >
           <option value="">Unmapped / Standalone New Scan</option>
-          <option value="wheat-field-a">Field A (Wheat � 2.4 acres) � Monitored Plot</option>
-          <option value="soybean-field-b">Field B (Soybean � 3.1 acres) � Monitored Plot</option>
-          <option value="tomato-field-c">Field C (Tomato � 1.2 acres) � Monitored Plot</option>
-          <option value="maize-field-d">Field D (Maize � 2.0 acres) � Monitored Plot</option>
+          <option value="wheat-field-a">Field A (Wheat • 2.4 acres) • Monitored Plot</option>
+          <option value="soybean-field-b">Field B (Soybean • 3.1 acres) • Monitored Plot</option>
+          <option value="tomato-field-c">Field C (Tomato • 1.2 acres) • Monitored Plot</option>
+          <option value="maize-field-d">Field D (Maize • 2.0 acres) • Monitored Plot</option>
         </select>
         {linkedPlotId ? (
           <div className="p-2 rounded-xl bg-white border border-emerald-200 text-xs text-emerald-950 space-y-0.5">
@@ -139,6 +141,7 @@ function ScanFormFields({
 }
 
 export default function ScanModal({ isOpen, onClose, initialPlot }) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('upload');
   const [selectedCrop, setSelectedCrop] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
@@ -452,13 +455,13 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
         <div className="flex items-start justify-between px-6 pt-6 pb-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Diagnose My Crop</span>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('ai_diagnoseCrop')}</span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
                 <Sparkles className="w-3 h-3 text-[#257038]" /> Powered by Gemini
               </span>
             </div>
-            <h2 className="text-2xl font-extrabold text-[#1a4d2e]">Crop Disease Scanner</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Upload a photo or use the live camera — both use Gemini AI.</p>
+            <h2 className="text-2xl font-extrabold text-[#1a4d2e]">{t('Crop Disease Scanner')}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{t('Upload a photo or use the live camera — both use Gemini AI.')}</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 cursor-pointer mt-1">
             <X className="w-5 h-5" />
@@ -472,12 +475,12 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                 onClick={() => { setActiveTab('upload'); stopCamera(); setCapturedFrame(null); }}
                 className={"flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all cursor-pointer " + (activeTab === 'upload' ? "bg-white text-[#206332] shadow-sm border border-green-100" : "text-gray-500 hover:text-gray-700")}
               >
-                <Upload className="w-4 h-4" /> Upload Image
+                <Upload className="w-4 h-4" /> {t('Upload Image')}
               </button>
               <button type="button" onClick={() => setActiveTab('camera')}
                 className={"flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all cursor-pointer " + (activeTab === 'camera' ? "bg-white text-[#206332] shadow-sm border border-green-100" : "text-gray-500 hover:text-gray-700")}
               >
-                <Camera className="w-4 h-4" /> Live Camera Scanner
+                <Camera className="w-4 h-4" /> {t('Live Camera Scanner')}
               </button>
             </div>
           </div>
@@ -498,14 +501,14 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                     <div className="w-40 h-40 rounded-xl overflow-hidden shadow-md border-2 border-white">
                       <img src={uploadedImage} alt="Crop" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-xs text-emerald-800 font-bold mt-2">Image Attached</p>
-                    <p className="text-[11px] text-gray-500">Click or drop to replace</p>
+                    <p className="text-xs text-emerald-800 font-bold mt-2">{t('Image Attached')}</p>
+                    <p className="text-[11px] text-gray-500">{t('Click or drop to replace')}</p>
                   </div>
                 ) : (
                   <div className="space-y-2 py-3">
                     <div className="w-12 h-12 rounded-2xl bg-white shadow border border-gray-200 flex items-center justify-center mx-auto text-[#257038]"><Upload className="w-6 h-6" /></div>
-                    <p className="text-sm font-bold text-gray-800">Drag & Drop or Click to Upload</p>
-                    <p className="text-xs text-gray-500">High-resolution leaf or fruit photo (PNG, JPG)</p>
+                    <p className="text-sm font-bold text-gray-800">{t('Drag & Drop or Click to Upload')}</p>
+                    <p className="text-xs text-gray-500">{t('High-resolution leaf or fruit photo (PNG, JPG)')}</p>
                   </div>
                 )}
               </div>
@@ -514,7 +517,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                 <button type="button" onClick={() => handleAnalyze()}
                   className="w-full py-3.5 px-6 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-extrabold text-sm tracking-wide shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4" /> Analyze with Gemini AI
+                  <Sparkles className="w-4 h-4" /> {t('Analyze with Gemini AI')}
                 </button>
               </div>
             </div>
@@ -650,7 +653,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
               </div>
               {diagnosisResult.simpleExplanation && (
                 <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#1a5028] uppercase tracking-wider mb-1"><Leaf className="w-3.5 h-3.5" /> What is Happening:</div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#1a5028] uppercase tracking-wider mb-1"><Leaf className="w-3.5 h-3.5" /> {t('sm_whatHappening') || 'What is Happening:'}</div>
                   <p className="text-xs text-gray-800 leading-relaxed">{diagnosisResult.simpleExplanation}</p>
                 </div>
               )}
@@ -658,14 +661,14 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                 <div className="p-3.5 rounded-xl bg-red-50/80 border border-red-200 flex items-start gap-2.5">
                   <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[11px] font-bold text-red-900 uppercase tracking-wider">Immediate Action:</p>
+                    <p className="text-[11px] font-bold text-red-900 uppercase tracking-wider">{t('sm_immediateAction') || 'Immediate Action:'}</p>
                     <p className="text-xs text-red-800 mt-0.5">{diagnosisResult.immediateAction}</p>
                   </div>
                 </div>
               )}
               {diagnosisResult.precautionsAndPrevention && (
                 <div className="p-4 rounded-2xl bg-[#fbfdfa] border border-gray-200 space-y-2">
-                  <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#257038]" /> Precautions:</h4>
+                  <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#257038]" /> {t('sm_precautions') || 'Precautions:'}</h4>
                   <ul className="space-y-1.5 text-xs text-gray-700">
                     {diagnosisResult.precautionsAndPrevention.map((item, i) => (
                       <li key={i} className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#257038] shrink-0 mt-0.5" /><span>{item}</span></li>
@@ -676,7 +679,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {diagnosisResult.organicRemedies && (
                   <div className="p-3.5 rounded-xl bg-[#edf7ef] border border-green-200">
-                    <h5 className="text-[11px] font-bold text-green-900 uppercase mb-1.5 flex items-center gap-1.5"><Leaf className="w-3.5 h-3.5" /> Organic:</h5>
+                    <h5 className="text-[11px] font-bold text-green-900 uppercase mb-1.5 flex items-center gap-1.5"><Leaf className="w-3.5 h-3.5" /> {t('sm_organic') || 'Organic:'}</h5>
                     <ul className="space-y-1 text-xs text-gray-700">
                       {diagnosisResult.organicRemedies.map((r, i) => <li key={i} className="flex items-start gap-1.5"><span className="text-[#257038] font-bold">•</span><span>{r}</span></li>)}
                     </ul>
@@ -684,7 +687,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                 )}
                 {diagnosisResult.chemicalTreatments && (
                   <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200">
-                    <h5 className="text-[11px] font-bold text-gray-900 uppercase mb-1.5 flex items-center gap-1.5"><ShieldAlert className="w-3.5 h-3.5 text-[#257038]" /> Chemical:</h5>
+                    <h5 className="text-[11px] font-bold text-gray-900 uppercase mb-1.5 flex items-center gap-1.5"><ShieldAlert className="w-3.5 h-3.5 text-[#257038]" /> {t('sm_chemical') || 'Chemical:'}</h5>
                     <ul className="space-y-1 text-xs text-gray-700">
                       {diagnosisResult.chemicalTreatments.map((c, i) => <li key={i} className="flex items-start gap-1.5"><span className="text-[#257038] font-bold">•</span><span>{c}</span></li>)}
                     </ul>
@@ -694,7 +697,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
               {diagnosisResult.weatherRiskAnalysis && (
                 <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
                   <CloudSun className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <div><span className="font-bold">Weather Risk: </span>{diagnosisResult.weatherRiskAnalysis}</div>
+                  <div><span className="font-bold">{t('sm_weatherRisk') || 'Weather Risk:'} </span>{diagnosisResult.weatherRiskAnalysis}</div>
                 </div>
               )}
               {/* Progressive Memory & Follow-up Efficacy Check */}
@@ -789,10 +792,10 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                       <div>
                         <p className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
                           <span>+</span>
-                          <span>Add to Farm Dashboard</span>
+                          <span>{t('sm_addToDashboard') || 'Add to Farm Dashboard'}</span>
                         </p>
                         <p className="text-[11px] text-gray-600 mt-0.5">
-                          Save this diagnosed crop as a new monitored field to track recovery over time.
+                          {t('Save this diagnosed crop as a new monitored field to track recovery over time.')}
                         </p>
                       </div>
                       <button
@@ -800,26 +803,26 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                         onClick={() => { setIsAddingToDashboard(true); }}
                         className="px-4 py-2 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
                       >
-                        <span>Add as New Crop Field</span>
+                        <span>{t('sm_addAsNew') || 'Add as New Crop Field'}</span>
                       </button>
                     </div>
                   )}
                   {!savedNewFieldSuccess && isAddingToDashboard && (
                     <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-300 space-y-3 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold text-[#1a4d2e] uppercase tracking-wider">Assign Field Location</span>
-                        <button type="button" onClick={() => setIsAddingToDashboard(false)} className="text-gray-400 hover:text-gray-600 text-xs font-bold cursor-pointer">Cancel</button>
+                        <span className="text-xs font-extrabold text-[#1a4d2e] uppercase tracking-wider">{t('sm_assignLocation')}</span>
+                        <button type="button" onClick={() => setIsAddingToDashboard(false)} className="text-gray-400 hover:text-gray-600 text-xs font-bold cursor-pointer">{t('Cancel')}</button>
                       </div>
-                      <p className="text-[11px] text-gray-600">Enter a name and size for this new crop field:</p>
+                      <p className="text-[11px] text-gray-600">{t('Enter a name and size for this new crop field:')}</p>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <div className="sm:col-span-2">
-                          <label className="block text-[11px] font-bold text-gray-700 mb-1">Field Name / Plot Location *</label>
+                          <label className="block text-[11px] font-bold text-gray-700 mb-1">{t('sm_fieldName')}</label>
                           <select
                             value={newPlotFieldName}
                             onChange={(e) => setNewPlotFieldName(e.target.value)}
                             className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038] cursor-pointer"
                           >
-                            <option value="" disabled>Select a field...</option>
+                            <option value="" disabled>{t('sm_selectField')}</option>
                             <option value="Field A (North Plot)">Field A (North Plot)</option>
                             <option value="Field B (East Acre)">Field B (East Acre)</option>
                             <option value="Field C (South Ridge)">Field C (South Ridge)</option>
@@ -829,7 +832,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[11px] font-bold text-gray-700 mb-1">Area (Acres)</label>
+                          <label className="block text-[11px] font-bold text-gray-700 mb-1">{t('sm_areaAcres')}</label>
                           <input
                             type="text"
                             value={newPlotAcres}
@@ -845,7 +848,7 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                         className="w-full py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold cursor-pointer flex items-center justify-center gap-2"
                       >
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>Save Field and Scan to Dashboard</span>
+                        <span>{t('sm_saveToDashboard')}</span>
                       </button>
                     </div>
                   )}
@@ -861,9 +864,9 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                 </div>
               )}
               <div className="pt-2 flex items-center gap-3 border-t border-gray-100">
-                <button type="button" onClick={handleReset} className="flex-1 py-2.5 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs cursor-pointer">Diagnose Another</button>
+                <button type="button" onClick={handleReset} className="flex-1 py-2.5 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs cursor-pointer">{t('sm_diagnoseAnother')}</button>
                 <button type="button" onClick={onClose} className="flex-1 py-2.5 px-4 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
-                  Done <CheckCircle2 className="w-3.5 h-3.5" />
+                  {t('sm_done')} <CheckCircle2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
