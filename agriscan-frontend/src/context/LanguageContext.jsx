@@ -1,0 +1,619 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+export const LANGUAGES = [
+  { code: 'en', label: 'EN', full: 'English' },
+  { code: 'hi', label: 'हिं', full: 'हिंदी' },
+  { code: 'mr', label: 'मरा', full: 'मराठी' },
+];
+
+export const TRANSLATIONS = {
+  en: {
+    home: 'Home',
+    dashboard: 'Dashboard',
+    features: 'Features',
+    howItWorks: 'How It Works',
+    aiAssistant: 'AI Assistant',
+    cropScan: 'Crop Scan',
+    kisanRakshak: 'Kisan Rakshak',
+
+    hero_badge: 'AI Crop Diagnosis • Progressive Tracking • Weather Sync',
+    hero_heading: 'INSTANT CROP DIAGNOSIS. SMARTER FARMING.',
+    hero_heading1: 'INSTANT CROP',
+    hero_heading2: 'DIAGNOSIS.',
+    hero_heading3: 'SMARTER FARMING.',
+    hero_subtitle: 'Kisan Rakshak uses your smartphone to detect plant disease and provide expert treatment solutions in seconds. Save your harvest with advanced technology.',
+    hero_scanBtn: 'Scan My Crops',
+    hero_demoBtn: 'Watch Demo',
+    hero_stat1: '98.4% Precision',
+    hero_stat2: 'Progressive Tracking',
+    hero_stat3: 'Weather Disease Sync',
+
+    hiw_title: 'How Kisan Rakshak Works',
+    hiw_subtitle: '3 simple steps from leaf photo to actionable treatment',
+    hiw_step1_badge: 'Step 01',
+    hiw_step1_title: '[1] SNAP A PHOTO',
+    hiw_step1_desc: 'Smartphone highlighting leaf',
+    hiw_step1_focus: 'FOCUS: LEAF',
+    hiw_step2_badge: 'Step 02',
+    hiw_step2_title: '[2] AI ANALYSIS',
+    hiw_step2_desc: 'Processing with identification in progress',
+    hiw_step3_badge: 'Step 03',
+    hiw_step3_title: '[3] GET SOLUTIONS',
+    hiw_step3_desc: 'Clear report with specific diagnosis and treatments',
+    hiw_scanReport: 'Scan Report',
+    hiw_match: '84% Match',
+    hiw_earlyBlight: 'Early Blight',
+    hiw_spray: 'Copper Octanoate Spray',
+    hiw_sanitize: 'Sanitize lower canopy',
+    hiw_saveYield: 'Save 95% Crop Yield',
+    hiw_expertVerified: 'Expert Verified',
+
+    benefits_title: 'Key Benefits',
+    benefits_subtitle: 'Field-tested by agronomists to protect crops and maximize harvest yields',
+    benefit1_title: 'Instant Diagnosis',
+    benefit1_desc: 'Sub-3-second results with high precision',
+    benefit2_title: 'Expert Advice',
+    benefit2_desc: 'Agronomist-validated treatment protocols',
+    benefit3_title: 'Crop History',
+    benefit3_desc: 'Progressive multi-scan recovery timeline',
+    benefit4_title: '50+ Supported Crops',
+    benefit4_desc: 'Vegetables, fruits, cereals & grains',
+
+    footer_contact: 'Contact',
+    footer_privacy: 'Privacy Policy',
+    footer_copy: '© 2024 Kisan Rakshak',
+
+    fp_suite: 'Core Agricultural Intelligence Suite',
+    fp_title: 'Kisan Rakshak Platform Features',
+    fp_subtitle: 'Precision agriculture tools in series: AI multimodal disease scanning, 7-day weather risk modeling, and bright-mode UP regional disease radar.',
+    fp_precisionSuite: 'Kisan Rakshak Precision Suite',
+    fp_sections: 'Sections:',
+    fp_tab1: '1. Crop Scan',
+    fp_tab2: '2. Weather Forecast',
+    fp_tab3: '3. UP Disease Radar',
+
+    db_home: 'Home',
+    db_addPlot: 'Add Plot',
+    db_scanCrop: 'Scan Crop',
+    db_healthy: 'Healthy',
+    db_monitor: 'Monitor',
+    db_critical: 'Critical',
+    db_sec1: 'FIELD MONITORING',
+    db_myCrops: 'My Crops',
+    db_sec2: 'WATER MANAGEMENT',
+    db_irrigation: 'Smart Irrigation Planner',
+    db_irrigationDesc: 'Automated soil moisture monitoring, evapotranspiration rates, and weather-synchronized watering schedules.',
+    db_telemetry: 'Telemetry refreshed: Soil moisture sensors updated across all 4 plots.',
+    db_soilMoisture: 'Soil Moisture',
+    db_nextAction: 'Next Action',
+    db_sowingDate: 'Sowing Date',
+    db_scanHistory: 'View Scan History',
+    db_pendingTasks: 'Pending Tasks',
+    db_addPlotTitle: 'Add New Crop Field',
+    db_cancel: 'Cancel',
+    db_savePlot: 'Save Plot to Dashboard',
+    db_cropName: 'Crop Name',
+    db_fieldLocation: 'Field / Location',
+    db_acreage: 'Acreage (acres)',
+    db_growthStage: 'Growth Stage',
+    db_variety: 'Variety',
+    db_done: 'Done',
+    db_addNewField: '+ Add New Field',
+    db_scanStress: 'Scan crop for moisture stress',
+
+    ai_online: 'Online',
+    ai_analyzing: 'KisanRakshak is analyzing...',
+    ai_diagnoseCrop: 'Diagnose My Crop',
+
+    sm_assignLocation: 'ASSIGN FIELD LOCATION',
+    sm_saveToDashboard: 'Save Field and Scan to Dashboard',
+    sm_fieldName: 'Field Name / Plot Location *',
+    sm_areaAcres: 'Area (Acres)',
+    sm_selectField: 'Select a field...',
+    sm_diagnoseAnother: 'Diagnose Another',
+    sm_done: 'Done',
+    sm_cancel: 'Cancel',
+  },
+
+  hi: {
+    home: 'होम',
+    dashboard: 'डैशबोर्ड',
+    features: 'विशेषताएँ',
+    howItWorks: 'यह कैसे काम करता है',
+    aiAssistant: 'AI सहायक',
+    cropScan: 'फसल स्कैन',
+    kisanRakshak: 'किसान रक्षक',
+
+    hero_badge: 'AI फसल निदान • प्रगतिशील ट्रैकिंग • मौसम सिंक',
+    hero_heading: 'तत्काल फसल निदान। स्मार्ट खेती।',
+    hero_heading1: 'तत्काल फसल',
+    hero_heading2: 'निदान।',
+    hero_heading3: 'स्मार्ट खेती।',
+    hero_subtitle: 'किसान रक्षक आपके स्मार्टफोन से पौधों के रोगों का पता लगाता है और सेकंडों में विशेषज्ञ उपचार प्रदान करता है। उन्नत तकनीक से अपनी फसल बचाएं।',
+    hero_scanBtn: 'मेरी फसल स्कैन करें',
+    hero_demoBtn: 'डेमो देखें',
+    hero_stat1: '98.4% सटीकता',
+    hero_stat2: 'प्रगतिशील ट्रैकिंग',
+    hero_stat3: 'मौसम रोग सिंक',
+
+    hiw_title: 'किसान रक्षक कैसे काम करता है',
+    hiw_subtitle: 'पत्ती की तस्वीर से लेकर कारगर उपचार तक 3 आसान चरण',
+    hiw_step1_badge: 'चरण 01',
+    hiw_step1_title: '[1] फोटो खींचें',
+    hiw_step1_desc: 'स्मार्टफोन से पत्ती पर फोकस करें',
+    hiw_step1_focus: 'फोकस: पत्ती',
+    hiw_step2_badge: 'चरण 02',
+    hiw_step2_title: '[2] AI विश्लेषण',
+    hiw_step2_desc: 'पहचान और विश्लेषण प्रगति पर है',
+    hiw_step3_badge: 'चरण 03',
+    hiw_step3_title: '[3] समाधान प्राप्त करें',
+    hiw_step3_desc: 'सटीक निदान और उपचार के साथ विस्तृत रिपोर्ट',
+    hiw_scanReport: 'स्कैन रिपोर्ट',
+    hiw_match: '84% मिलान',
+    hiw_earlyBlight: 'अर्ली ब्लाइट (अगेती झुलसा)',
+    hiw_spray: 'कॉपर ऑक्टेनोएट स्प्रे',
+    hiw_sanitize: 'निचली पत्तियों की सफाई करें',
+    hiw_saveYield: '95% फसल उपज बचाएं',
+    hiw_expertVerified: 'विशेषज्ञ द्वारा सत्यापित',
+
+    benefits_title: 'मुख्य लाभ',
+    benefits_subtitle: 'फसलों की सुरक्षा और अधिकतम उपज के लिए कृषि विशेषज्ञों द्वारा परीक्षित',
+    benefit1_title: 'त्वरित निदान',
+    benefit1_desc: 'उच्च सटीकता के साथ 3 सेकंड में परिणाम',
+    benefit2_title: 'विशेषज्ञ सलाह',
+    benefit2_desc: 'कृषि विशेषज्ञों द्वारा प्रमाणित उपचार',
+    benefit3_title: 'फसल इतिहास',
+    benefit3_desc: 'रिकवरी की प्रगतिशील बहु-स्कैन समयरेखा',
+    benefit4_title: '50+ समर्थित फसलें',
+    benefit4_desc: 'सब्जियां, फल, अनाज और दलहन',
+
+    footer_contact: 'संपर्क करें',
+    footer_privacy: 'गोपनीयता नीति',
+    footer_copy: '© 2024 किसान रक्षक',
+
+    fp_suite: 'मुख्य कृषि बुद्धिमत्ता सूट',
+    fp_title: 'किसान रक्षक प्लेटफॉर्म सुविधाएँ',
+    fp_subtitle: 'सटीक कृषि उपकरण: AI रोग स्कैनिंग, 7-दिवसीय मौसम जोखिम पूर्वानुमान और यूपी क्षेत्रीय रोग रडार।',
+    fp_precisionSuite: 'किसान रक्षक प्रिसिजन सूट',
+    fp_sections: 'अनुभाग:',
+    fp_tab1: '1. फसल स्कैन',
+    fp_tab2: '2. मौसम पूर्वानुमान',
+    fp_tab3: '3. यूपी रोग रडार',
+
+    db_home: 'होम',
+    db_addPlot: 'प्लॉट जोड़ें',
+    db_scanCrop: 'फसल स्कैन करें',
+    db_healthy: 'स्वस्थ',
+    db_monitor: 'निगरानी रखें',
+    db_critical: 'गंभीर',
+    db_sec1: 'खेत निगरानी',
+    db_myCrops: 'मेरी फसलें',
+    db_sec2: 'जल प्रबंधन',
+    db_irrigation: 'स्मार्ट सिंचाई योजना',
+    db_irrigationDesc: 'स्वचालित मिट्टी की नमी की निगरानी, वाष्पोत्सर्जन दर, और मौसम-सिंक्रनाइज़ पानी देने का समय।',
+    db_telemetry: 'टेलीमेट्री अपडेट: सभी 4 प्लॉट में मिट्टी नमी सेंसर अपडेट हो गए।',
+    db_soilMoisture: 'मिट्टी की नमी',
+    db_nextAction: 'अगला कदम',
+    db_sowingDate: 'बुआई तिथि',
+    db_scanHistory: 'स्कैन इतिहास देखें',
+    db_pendingTasks: 'लंबित कार्य',
+    db_addPlotTitle: 'नया फसल क्षेत्र जोड़ें',
+    db_cancel: 'रद्द करें',
+    db_savePlot: 'डैशबोर्ड में प्लॉट सहेजें',
+    db_cropName: 'फसल का नाम',
+    db_fieldLocation: 'खेत / स्थान',
+    db_acreage: 'क्षेत्रफल (एकड़)',
+    db_growthStage: 'वृद्धि चरण',
+    db_variety: 'किस्म',
+    db_done: 'हो गया',
+    db_addNewField: '+ नया खेत जोड़ें',
+    db_scanStress: 'नमी तनाव के लिए फसल स्कैन करें',
+
+    ai_online: 'ऑनलाइन',
+    ai_analyzing: 'किसान रक्षक विश्लेषण कर रहा है...',
+    ai_diagnoseCrop: 'मेरी फसल का निदान करें',
+
+    sm_assignLocation: 'खेत का स्थान चुनें',
+    sm_saveToDashboard: 'खेत और स्कैन को डैशबोर्ड में सहेजें',
+    sm_fieldName: 'खेत का नाम / स्थान *',
+    sm_areaAcres: 'क्षेत्रफल (एकड़)',
+    sm_selectField: 'एक खेत चुनें...',
+    sm_diagnoseAnother: 'अन्य फसल का निदान करें',
+    sm_done: 'पूर्ण',
+    sm_cancel: 'रद्द करें',
+  },
+
+  mr: {
+    home: 'मुख्यपृष्ठ',
+    dashboard: 'डॅशबोर्ड',
+    features: 'वैशिष्ट्ये',
+    howItWorks: 'हे कसे कार्य करते',
+    aiAssistant: 'AI सहाय्यक',
+    cropScan: 'पीक स्कॅन',
+    kisanRakshak: 'किसान रक्षक',
+
+    hero_badge: 'AI पीक निदान • प्रगतीशील ट्रॅकिंग • हवामान सिंक',
+    hero_heading: 'त्वरित पीक निदान. प्रगत शेती.',
+    hero_heading1: 'त्वरित पीक',
+    hero_heading2: 'निदान.',
+    hero_heading3: 'प्रगत शेती.',
+    hero_subtitle: 'किसान रक्षक तुमच्या स्मार्टफोनने वनस्पतींचे रोग शोधतो आणि काही सेकंदात तज्ज्ञ उपचार देतो. आधुनिक तंत्रज्ञानाने तुमचे पीक वाचवा.',
+    hero_scanBtn: 'माझे पीक स्कॅन करा',
+    hero_demoBtn: 'डेमो पहा',
+    hero_stat1: '98.4% अचूकता',
+    hero_stat2: 'प्रगतीशील ट्रॅकिंग',
+    hero_stat3: 'हवामान रोग सिंक',
+
+    hiw_title: 'किसान रक्षक कसे कार्य करते',
+    hiw_subtitle: 'पानाच्या फोटोपासून प्रभावी उपचारांपर्यंत 3 सोप्या पायऱ्या',
+    hiw_step1_badge: 'पायरी 01',
+    hiw_step1_title: '[1] फोटो काढा',
+    hiw_step1_desc: 'स्मार्टफोनने पानावर लक्ष केंद्रित करा',
+    hiw_step1_focus: 'फोकस: पान',
+    hiw_step2_badge: 'पायरी 02',
+    hiw_step2_title: '[2] AI विश्लेषण',
+    hiw_step2_desc: 'ओळख आणि विश्लेषण सुरू आहे',
+    hiw_step3_badge: 'पायरी 03',
+    hiw_step3_title: '[3] उपाय मिळवा',
+    hiw_step3_desc: 'अचूक निदान आणि उपचारांसह सविस्तर अहवाल',
+    hiw_scanReport: 'स्कॅन अहवाल',
+    hiw_match: '84% जुळणी',
+    hiw_earlyBlight: 'अर्ली ब्लाइट (करपा)',
+    hiw_spray: 'कॉपर ऑक्टॅनोएट फवारणी',
+    hiw_sanitize: 'खालच्या पानांची स्वच्छता करा',
+    hiw_saveYield: '95% पीक उत्पादन वाचवा',
+    hiw_expertVerified: 'तज्ज्ञांद्वारे प्रमाणित',
+
+    benefits_title: 'मुख्य फायदे',
+    benefits_subtitle: 'पिकांचे रक्षण आणि जास्तीत जास्त उत्पादनासाठी कृषी तज्ज्ञांनी तपासलेले',
+    benefit1_title: 'झटपट निदान',
+    benefit1_desc: 'अचूकतेसह 3 सेकंदांत निकाल',
+    benefit2_title: 'तज्ज्ञ सल्ला',
+    benefit2_desc: 'कृषी तज्ज्ञांद्वारे प्रमाणित उपचार पद्धती',
+    benefit3_title: 'पीक इतिहास',
+    benefit3_desc: 'सुधारणेची प्रगतीशील बहु-स्कॅन टाइमलाइन',
+    benefit4_title: '50+ समर्थित पिके',
+    benefit4_desc: 'भाज्या, फळे, तृणधान्ये आणि कडधान्ये',
+
+    footer_contact: 'संपर्क',
+    footer_privacy: 'गोपनीयता धोरण',
+    footer_copy: '© 2024 किसान रक्षक',
+
+    fp_suite: 'मुख्य कृषी बुद्धिमत्ता संच',
+    fp_title: 'किसान रक्षक प्लॅटफॉर्म वैशिष्ट्ये',
+    fp_subtitle: 'अचूक शेती साधने: AI रोग स्कॅनिंग, 7-दिवसीय हवामान अंदाज आणि यूपी प्रादेशिक रोग रडार.',
+    fp_precisionSuite: 'किसान रक्षक प्रिसिजन संच',
+    fp_sections: 'विभाग:',
+    fp_tab1: '1. पीक स्कॅन',
+    fp_tab2: '2. हवामान अंदाज',
+    fp_tab3: '3. यूपी रोग रडार',
+
+    db_home: 'मुख्यपृष्ठ',
+    db_addPlot: 'प्लॉट जोडा',
+    db_scanCrop: 'पीक स्कॅन करा',
+    db_healthy: 'निरोगी',
+    db_monitor: 'लक्ष ठेवा',
+    db_critical: 'गंभीर',
+    db_sec1: 'शेत निरीक्षण',
+    db_myCrops: 'माझी पिके',
+    db_sec2: 'पाणी व्यवस्थापन',
+    db_irrigation: 'स्मार्ट सिंचन नियोजन',
+    db_irrigationDesc: 'स्वयंचलित मातीतील ओलावा निरीक्षण, बाष्पोत्सर्जन दर, आणि हवामान-सिंक्रोनाइझ पाणी देण्याच्या वेळापत्रके.',
+    db_telemetry: 'टेलिमेट्री अपडेट: सर्व 4 प्लॉटमध्ये माती ओलावा सेन्सर अपडेट झाले.',
+    db_soilMoisture: 'मातीतील ओलावा',
+    db_nextAction: 'पुढील कृती',
+    db_sowingDate: 'पेरणी तारीख',
+    db_scanHistory: 'स्कॅन इतिहास पहा',
+    db_pendingTasks: 'प्रलंबित कार्ये',
+    db_addPlotTitle: 'नवीन पीक क्षेत्र जोडा',
+    db_cancel: 'रद्द करा',
+    db_savePlot: 'डॅशबोर्डमध्ये प्लॉट जतन करा',
+    db_cropName: 'पिकाचे नाव',
+    db_fieldLocation: 'शेत / ठिकाण',
+    db_acreage: 'क्षेत्रफळ (एकर)',
+    db_growthStage: 'वाढीचा टप्पा',
+    db_variety: 'वाण',
+    db_done: 'झाले',
+    db_addNewField: '+ नवीन शेत जोडा',
+    db_scanStress: 'ओलावा तणावासाठी पीक स्कॅन करा',
+
+    ai_online: 'ऑनलाइन',
+    ai_analyzing: 'किसान रक्षक विश्लेषण करत आहे...',
+    ai_diagnoseCrop: 'माझ्या पिकाचे निदान करा',
+
+    sm_assignLocation: 'शेताचे स्थान निवडा',
+    sm_saveToDashboard: 'शेत आणि स्कॅन डॅशबोर्डवर जतन करा',
+    sm_fieldName: 'शेताचे नाव / स्थान *',
+    sm_areaAcres: 'क्षेत्रफळ (एकर)',
+    sm_selectField: 'एक शेत निवडा...',
+    sm_diagnoseAnother: 'दुसऱ्या पिकाचे निदान करा',
+    sm_done: 'पूर्ण',
+    sm_cancel: 'रद्द करा',
+  },
+};
+
+export const PHRASE_MAP = {
+  hi: {
+    'Home': 'होम',
+    'Dashboard': 'डैशबोर्ड',
+    'Features': 'विशेषताएँ',
+    'How It Works': 'यह कैसे काम करता है',
+    'AI Assistant': 'AI सहायक',
+    'Crop Scan': 'फसल स्कैन',
+    'Kisan': 'किसान',
+    'Rakshak': 'रक्षक',
+    'AI Crop Diagnosis • Progressive Tracking • Weather Sync': 'AI फसल निदान • प्रगतिशील ट्रैकिंग • मौसम सिंक',
+    'INSTANT CROP DIAGNOSIS.': 'तत्काल फसल निदान।',
+    'SMARTER FARMING.': 'स्मार्ट खेती।',
+    'Kisan Rakshak uses your smartphone to detect plant disease and provide expert treatment solutions in seconds. Save your harvest with advanced technology.': 'किसान रक्षक आपके स्मार्टफोन से पौधों के रोगों का पता लगाता है और सेकंडों में विशेषज्ञ उपचार प्रदान करता है। उन्नत तकनीक से अपनी फसल बचाएं।',
+    'Scan My Crops': 'मेरी फसल स्कैन करें',
+    'Watch Demo': 'डेमो देखें',
+    '98.4% Precision': '98.4% सटीकता',
+    'Progressive Tracking': 'प्रगतिशील ट्रैकिंग',
+    'Weather Disease Sync': 'मौसम रोग सिंक',
+    'How Kisan Rakshak Works': 'किसान रक्षक कैसे काम करता है',
+    '3 simple steps from leaf photo to actionable treatment': 'पत्ती की तस्वीर से लेकर कारगर उपचार तक 3 आसान चरण',
+    'Step 01': 'चरण 01',
+    '[1] SNAP A PHOTO': '[1] फोटो खींचें',
+    'Smartphone highlighting leaf': 'स्मार्टफोन से पत्ती पर फोकस करें',
+    'FOCUS: LEAF': 'फोकस: पत्ती',
+    'Step 02': 'चरण 02',
+    '[2] AI ANALYSIS': '[2] AI विश्लेषण',
+    'Processing with identification in progress': 'पहचान और विश्लेषण प्रगति पर है',
+    'Neural Pattern Matching...': 'न्यूरल पैटर्न मिलान...',
+    '50,000+ Plant Models': '50,000+ पौधे मॉडल',
+    'Kisan Rakshak Core v3.4': 'किसान रक्षक कोर v3.4',
+    'Step 03': 'चरण 03',
+    '[3] GET SOLUTIONS': '[3] समाधान प्राप्त करें',
+    'Clear report with specific diagnosis and treatments': 'सटीक निदान और उपचार के साथ विस्तृत रिपोर्ट',
+    'Scan Report': 'स्कैन रिपोर्ट',
+    '84% Match': '84% मिलान',
+    'Early Blight': 'अर्ली ब्लाइट (अगेती झुलसा)',
+    'Alternaria solani': 'अल्टरनेरिया सोलानी',
+    'Copper Octanoate Spray': 'कॉपर ऑक्टेनोएट स्प्रे',
+    'Sanitize lower canopy': 'निचली पत्तियों की सफाई करें',
+    'Save 95% Crop Yield': '95% फसल उपज बचाएं',
+    'Expert Verified': 'विशेषज्ञ द्वारा सत्यापित',
+    'Key Benefits': 'मुख्य लाभ',
+    'Field-tested by agronomists to protect crops and maximize harvest yields': 'फसलों की सुरक्षा और अधिकतम उपज के लिए कृषि विशेषज्ञों द्वारा परीक्षित',
+    'Instant Diagnosis': 'त्वरित निदान',
+    'Sub-3-second results with high precision': 'उच्च सटीकता के साथ 3 सेकंड में परिणाम',
+    'Expert Advice': 'विशेषज्ञ सलाह',
+    'Agronomist-validated treatment protocols': 'कृषि विशेषज्ञों द्वारा प्रमाणित उपचार',
+    'Crop History': 'फसल इतिहास',
+    'Progressive multi-scan recovery timeline': 'रिकवरी की प्रगतिशील बहु-स्कैन समयरेखा',
+    '50+ Supported Crops': '50+ समर्थित फसलें',
+    'Vegetables, fruits, cereals & grains': 'सब्जियां, फल, अनाज और दलहन',
+    'Contact': 'संपर्क करें',
+    'Privacy Policy': 'गोपनीयता नीति',
+    'Core Agricultural Intelligence Suite': 'मुख्य कृषि बुद्धिमत्ता सूट',
+    'Kisan Rakshak Platform Features': 'किसान रक्षक प्लेटफॉर्म सुविधाएँ',
+    'Sections:': 'अनुभाग:',
+    '1. Crop Scan': '1. फसल स्कैन',
+    '2. Weather Forecast': '2. मौसम पूर्वानुमान',
+    '3. UP Disease Radar': '3. यूपी रोग रडार',
+    'Kisan Rakshak Precision Suite': 'किसान रक्षक प्रिसिजन सूट',
+    'My Crops': 'मेरी फसलें',
+    'FIELD MONITORING': 'खेत निगरानी',
+    'WATER MANAGEMENT': 'जल प्रबंधन',
+    'Smart Irrigation Planner': 'स्मार्ट सिंचाई योजना',
+    'Add Plot': 'प्लॉट जोड़ें',
+    'Scan Crop': 'फसल स्कैन करें',
+    'Healthy': 'स्वस्थ',
+    'Monitor': 'निगरानी रखें',
+    'Critical': 'गंभीर',
+    'Critically Dry': 'अत्यधिक सूखा',
+    'View Scan History': 'स्कैन इतिहास देखें',
+    'Pending Tasks': 'लंबित कार्य',
+    'ASSIGN FIELD LOCATION': 'खेत का स्थान चुनें',
+    'Save Field and Scan to Dashboard': 'खेत और स्कैन को डैशबोर्ड में सहेजें',
+    'Field Name / Plot Location *': 'खेत का नाम / स्थान *',
+    'Area (Acres)': 'क्षेत्रफल (एकड़)',
+    'Select a field...': 'एक खेत चुनें...',
+    'Diagnose Another': 'अन्य फसल का निदान करें',
+    'Done': 'पूर्ण',
+    'Cancel': 'रद्द करें',
+    'Soil Moisture': 'मिट्टी की नमी',
+    'Next Action': 'अगला कदम',
+    'Sowing Date': 'बुआई तिथि',
+    'View field tasks': 'खेत के कार्य देखें',
+    'Online': 'ऑनलाइन',
+    'KisanRakshak is analyzing...': 'किसान रक्षक विश्लेषण कर रहा है...',
+    'Diagnose My Crop': 'मेरी फसल का निदान करें',
+  },
+  mr: {
+    'Home': 'मुख्यपृष्ठ',
+    'Dashboard': 'डॅशबोर्ड',
+    'Features': 'वैशिष्ट्ये',
+    'How It Works': 'हे कसे कार्य करते',
+    'AI Assistant': 'AI सहाय्यक',
+    'Crop Scan': 'पीक स्कॅन',
+    'Kisan': 'किसान',
+    'Rakshak': 'रक्षक',
+    'AI Crop Diagnosis • Progressive Tracking • Weather Sync': 'AI पीक निदान • प्रगतीशील ट्रॅकिंग • हवामान सिंक',
+    'INSTANT CROP DIAGNOSIS.': 'त्वरित पीक निदान.',
+    'SMARTER FARMING.': 'प्रगत शेती.',
+    'Kisan Rakshak uses your smartphone to detect plant disease and provide expert treatment solutions in seconds. Save your harvest with advanced technology.': 'किसान रक्षक तुमच्या स्मार्टफोनने वनस्पतींचे रोग शोधतो आणि काही सेकंदात तज्ज्ञ उपचार देतो. आधुनिक तंत्रज्ञानाने तुमचे पीक वाचवा.',
+    'Scan My Crops': 'माझे पीक स्कॅन करा',
+    'Watch Demo': 'डेमो पहा',
+    '98.4% Precision': '98.4% अचूकता',
+    'Progressive Tracking': 'प्रगतीशील ट्रॅकिंग',
+    'Weather Disease Sync': 'हवामान रोग सिंक',
+    'How Kisan Rakshak Works': 'किसान रक्षक कसे कार्य करते',
+    '3 simple steps from leaf photo to actionable treatment': 'पानाच्या फोटोपासून प्रभावी उपचारांपर्यंत 3 सोप्या पायऱ्या',
+    'Step 01': 'पायरी 01',
+    '[1] SNAP A PHOTO': '[1] फोटो काढा',
+    'Smartphone highlighting leaf': 'स्मार्टफोनने पानावर लक्ष केंद्रित करा',
+    'FOCUS: LEAF': 'फोकस: पान',
+    'Step 02': 'पायरी 02',
+    '[2] AI ANALYSIS': '[2] AI विश्लेषण',
+    'Processing with identification in progress': 'ओळख आणि विश्लेषण सुरू आहे',
+    'Neural Pattern Matching...': 'न्यूरल पॅटर्न जुळणी...',
+    '50,000+ Plant Models': '50,000+ वनस्पती मॉडेल',
+    'Kisan Rakshak Core v3.4': 'किसान रक्षक कोर v3.4',
+    'Step 03': 'पायरी 03',
+    '[3] GET SOLUTIONS': '[3] उपाय मिळवा',
+    'Clear report with specific diagnosis and treatments': 'अचूक निदान आणि उपचारांसह सविस्तर अहवाल',
+    'Scan Report': 'स्कॅन अहवाल',
+    '84% Match': '84% जुळणी',
+    'Early Blight': 'अर्ली ब्लाइट (करपा)',
+    'Alternaria solani': 'अल्टरनेरिया सोलानी',
+    'Copper Octanoate Spray': 'कॉपर ऑक्टॅनोएट फवारणी',
+    'Sanitize lower canopy': 'खालच्या पानांची स्वच्छता करा',
+    'Save 95% Crop Yield': '95% पीक उत्पादन वाचवा',
+    'Expert Verified': 'तज्ज्ञांद्वारे प्रमाणित',
+    'Key Benefits': 'मुख्य फायदे',
+    'Field-tested by agronomists to protect crops and maximize harvest yields': 'पिकांचे रक्षण आणि जास्तीत जास्त उत्पादनासाठी कृषी तज्ज्ञांनी तपासलेले',
+    'Instant Diagnosis': 'झटपट निदान',
+    'Sub-3-second results with high precision': 'अचूकतेसह 3 सेकंदांत निकाल',
+    'Expert Advice': 'तज्ज्ञ सल्ला',
+    'Agronomist-validated treatment protocols': 'कृषी तज्ज्ञांद्वारे प्रमाणित उपचार पद्धती',
+    'Crop History': 'पीक इतिहास',
+    'Progressive multi-scan recovery timeline': 'सुधारणेची प्रगतीशील बहु-स्कॅन टाइमलाइन',
+    '50+ Supported Crops': '50+ समर्थित पिके',
+    'Vegetables, fruits, cereals & grains': 'भाज्या, फळे, तृणधान्ये आणि कडधान्ये',
+    'Contact': 'संपर्क',
+    'Privacy Policy': 'गोपनीयता धोरण',
+    'Core Agricultural Intelligence Suite': 'मुख्य कृषी बुद्धिमत्ता संच',
+    'Kisan Rakshak Platform Features': 'किसान रक्षक प्लॅटफॉर्म वैशिष्ट्ये',
+    'Sections:': 'विभाग:',
+    '1. Crop Scan': '1. पीक स्कॅन',
+    '2. Weather Forecast': '2. हवामान अंदाज',
+    '3. UP Disease Radar': '3. यूपी रोग रडार',
+    'Kisan Rakshak Precision Suite': 'किसान रक्षक प्रिसिजन संच',
+    'My Crops': 'माझी पिके',
+    'FIELD MONITORING': 'शेत निरीक्षण',
+    'WATER MANAGEMENT': 'पाणी व्यवस्थापन',
+    'Smart Irrigation Planner': 'स्मार्ट सिंचन नियोजन',
+    'Add Plot': 'प्लॉट जोडा',
+    'Scan Crop': 'पीक स्कॅन करा',
+    'Healthy': 'निरोगी',
+    'Monitor': 'लक्ष ठेवा',
+    'Critical': 'गंभीर',
+    'Critically Dry': 'अत्यंत कोरडे',
+    'View Scan History': 'स्कॅन इतिहास पहा',
+    'Pending Tasks': 'प्रलंबित कार्ये',
+    'ASSIGN FIELD LOCATION': 'शेताचे स्थान निवडा',
+    'Save Field and Scan to Dashboard': 'शेत आणि स्कॅन डॅशबोर्डवर जतन करा',
+    'Field Name / Plot Location *': 'शेताचे नाव / स्थान *',
+    'Area (Acres)': 'क्षेत्रफळ (एकर)',
+    'Select a field...': 'एक शेत निवडा...',
+    'Diagnose Another': 'दुसऱ्या पिकाचे निदान करा',
+    'Done': 'पूर्ण',
+    'Cancel': 'रद्द करा',
+    'Soil Moisture': 'मातीतील ओलावा',
+    'Next Action': 'पुढील कृती',
+    'Sowing Date': 'पेरणी तारीख',
+    'View field tasks': 'शेतातील कामे पहा',
+    'Online': 'ऑनलाइन',
+    'KisanRakshak is analyzing...': 'किसान रक्षक विश्लेषण करत आहे...',
+    'Diagnose My Crop': 'माझ्या पिकाचे निदान करा',
+  },
+};
+
+const LanguageContext = createContext({
+  lang: 'en',
+  setLang: () => {},
+  t: (key) => key,
+});
+
+export function LanguageProvider({ children }) {
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem('kisan_lang') || 'en';
+    } catch {
+      return 'en';
+    }
+  });
+
+  const handleSetLang = (newLang) => {
+    setLang(newLang);
+    try {
+      localStorage.setItem('kisan_lang', newLang);
+    } catch {}
+  };
+
+  const t = (keyOrText) => {
+    if (!keyOrText) return '';
+    if (TRANSLATIONS[lang] && TRANSLATIONS[lang][keyOrText] !== undefined) {
+      return TRANSLATIONS[lang][keyOrText];
+    }
+    if (PHRASE_MAP[lang] && PHRASE_MAP[lang][keyOrText] !== undefined) {
+      return PHRASE_MAP[lang][keyOrText];
+    }
+    if (TRANSLATIONS['en'] && TRANSLATIONS['en'][keyOrText] !== undefined) {
+      return TRANSLATIONS['en'][keyOrText];
+    }
+    return keyOrText;
+  };
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const translateDOM = () => {
+      if (lang === 'en') {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+        let node;
+        while ((node = walker.nextNode())) {
+          if (node._originalEn) {
+            node.nodeValue = node._originalEn;
+          }
+        }
+        return;
+      }
+
+      const map = PHRASE_MAP[lang];
+      if (!map) return;
+
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode: (n) => {
+          const parent = n.parentElement;
+          if (!parent) return NodeFilter.FILTER_REJECT;
+          const tag = parent.tagName.toLowerCase();
+          if (tag === 'script' || tag === 'style' || tag === 'input' || tag === 'textarea') {
+            return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+
+      let node;
+      while ((node = walker.nextNode())) {
+        const raw = node.nodeValue;
+        if (!raw) continue;
+        const trimmed = raw.trim();
+        if (!trimmed) continue;
+
+        if (!node._originalEn) {
+          node._originalEn = raw;
+        }
+
+        const enTrimmed = node._originalEn.trim();
+        if (map[enTrimmed]) {
+          const replacement = map[enTrimmed];
+          node.nodeValue = node._originalEn.replace(enTrimmed, replacement);
+        }
+      }
+    };
+
+    translateDOM();
+
+    const observer = new MutationObserver(() => {
+      translateDOM();
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+    return () => observer.disconnect();
+  }, [lang]);
+
+  return (
+    <LanguageContext.Provider value={{ lang, setLang: handleSetLang, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  return useContext(LanguageContext);
+}

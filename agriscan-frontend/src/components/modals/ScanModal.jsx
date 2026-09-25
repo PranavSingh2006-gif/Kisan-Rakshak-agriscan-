@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+ï»¿import React, { useState, useRef, useEffect } from 'react';
 import {
   X, Upload, CheckCircle2, AlertTriangle, ShieldCheck, Leaf, RefreshCw,
-  Sparkles, ChevronDown, Check, ShieldAlert, Info, CloudSun,
+  Sparkles, ChevronDown, Check, ShieldAlert, Info, CloudSun, Calendar, MapPin, Plus,
   Camera, Video, VideoOff, Circle, FlipHorizontal, SwitchCamera
 } from 'lucide-react';
 import { cropDatabase } from '../../data/cropData';
@@ -56,10 +56,10 @@ function ScanFormFields({
           className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038]"
         >
           <option value="">Unmapped / Standalone New Scan</option>
-          <option value="wheat-field-a">Field A (Wheat • 2.4 acres) — Monitored Plot</option>
-          <option value="soybean-field-b">Field B (Soybean • 3.1 acres) — Monitored Plot</option>
-          <option value="tomato-field-c">Field C (Tomato • 1.2 acres) — Monitored Plot</option>
-          <option value="maize-field-d">Field D (Maize • 2.0 acres) — Monitored Plot</option>
+          <option value="wheat-field-a">Field A (Wheat ï¿½ 2.4 acres) ï¿½ Monitored Plot</option>
+          <option value="soybean-field-b">Field B (Soybean ï¿½ 3.1 acres) ï¿½ Monitored Plot</option>
+          <option value="tomato-field-c">Field C (Tomato ï¿½ 1.2 acres) ï¿½ Monitored Plot</option>
+          <option value="maize-field-d">Field D (Maize ï¿½ 2.0 acres) ï¿½ Monitored Plot</option>
         </select>
         {linkedPlotId ? (
           <div className="p-2 rounded-xl bg-white border border-emerald-200 text-xs text-emerald-950 space-y-0.5">
@@ -151,8 +151,10 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [capturedFrame, setCapturedFrame] = useState(null);
-  const [isMirrored, setIsMirrored] = useState(true);
-  const [facingMode, setFacingMode] = useState('environment');
+  // Detect mobile device to pick the right default camera
+  const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const [facingMode, setFacingMode] = useState(isMobileDevice ? 'environment' : 'user');
+  const [isMirrored, setIsMirrored] = useState(!isMobileDevice); // mirror front-cam (laptop), don't mirror rear (phone)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStep, setAnalysisStep] = useState('');
   const [diagnosisResult, setDiagnosisResult] = useState(null);
@@ -261,16 +263,29 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
 
   const startCamera = async () => {
     setCameraError(''); setCapturedFrame(null);
+    // On mobile prefer rear (environment) camera; on laptop/desktop use any available camera (user/front)
+    const videoConstraints = isMobileDevice
+      ? { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+      : { width: { ideal: 1280 }, height: { ideal: 720 } }; // no facingMode on laptop â€” avoids NotFoundError
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+      const s = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
       streamRef.current = s;
       if (videoRef.current) { videoRef.current.srcObject = s; videoRef.current.play(); }
       setCameraActive(true);
     } catch (err) {
-      if (err.name === 'NotAllowedError') setCameraError('Camera permission denied. Allow camera in browser settings.');
+      if (err.name === 'NotAllowedError') setCameraError('Camera permission denied. Please allow camera access in your browser settings.');
       else if (err.name === 'NotFoundError') setCameraError('No camera found on this device.');
+      else if (err.name === 'OverconstrainedError') {
+        // Fallback: try without facingMode constraint
+        try {
+          const s = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          streamRef.current = s;
+          if (videoRef.current) { videoRef.current.srcObject = s; videoRef.current.play(); }
+          setCameraActive(true);
+        } catch (e2) { setCameraError('Camera error: ' + e2.message); setCameraActive(false); }
+      }
       else setCameraError('Camera error: ' + err.message);
-      setCameraActive(false);
+      if (!cameraActive) setCameraActive(false);
     }
   };
 
@@ -290,11 +305,12 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
   const retakePhoto = () => { setCapturedFrame(null); startCamera(); };
 
   const flipCamera = async () => {
+    if (!isMobileDevice) return; // Laptop/desktop typically has only one camera
     stopCamera();
     const next = facingMode === 'environment' ? 'user' : 'environment';
     setFacingMode(next); setIsMirrored(next === 'user'); setCameraError(''); setCapturedFrame(null);
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: next }, audio: false });
+      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: next }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
       streamRef.current = s;
       if (videoRef.current) { videoRef.current.srcObject = s; videoRef.current.play(); }
       setCameraActive(true);
@@ -522,9 +538,11 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                       </div>
                     </div>
                     <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-4">
-                      <button type="button" onClick={flipCamera} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center cursor-pointer border border-white/30">
-                        <SwitchCamera className="w-5 h-5 text-white" />
-                      </button>
+                      {isMobileDevice && (
+                        <button type="button" onClick={flipCamera} title="Switch Camera" className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center cursor-pointer border border-white/30">
+                          <SwitchCamera className="w-5 h-5 text-white" />
+                        </button>
+                      )}
                       <button type="button" onClick={captureSnapshot} className="w-16 h-16 rounded-full bg-white border-4 border-emerald-400 flex items-center justify-center shadow-xl cursor-pointer hover:scale-105 active:scale-95 transition-transform">
                         <div className="w-11 h-11 rounded-full bg-[#206332] flex items-center justify-center"><Circle className="w-5 h-5 text-white fill-white" /></div>
                       </button>
@@ -796,13 +814,19 @@ export default function ScanModal({ isOpen, onClose, initialPlot }) {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <div className="sm:col-span-2">
                           <label className="block text-[11px] font-bold text-gray-700 mb-1">Field Name / Plot Location *</label>
-                          <input
-                            type="text"
+                          <select
                             value={newPlotFieldName}
                             onChange={(e) => setNewPlotFieldName(e.target.value)}
-                            placeholder="e.g. Field E, North Acre, Polyhouse 1..."
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-[#257038]"
-                          />
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-gray-300 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#257038] cursor-pointer"
+                          >
+                            <option value="" disabled>Select a field...</option>
+                            <option value="Field A (North Plot)">Field A (North Plot)</option>
+                            <option value="Field B (East Acre)">Field B (East Acre)</option>
+                            <option value="Field C (South Ridge)">Field C (South Ridge)</option>
+                            {newPlotFieldName === 'Field C (South Ridge)' && (
+                              <option value="Field D (Canal Side)">Field D (Canal Side)</option>
+                            )}
+                          </select>
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-gray-700 mb-1">Area (Acres)</label>

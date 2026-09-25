@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { Camera, CloudSun, MapPin, Sparkles } from 'lucide-react';
 import CropScanFeatureCard from './CropScanFeatureCard';
 import WeatherForecastFeatureCard from './WeatherForecastFeatureCard';
 import GeospatialUPMapFeatureCard from './GeospatialUPMapFeatureCard';
 import Footer from '../Footer';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function FeaturesPage({ onNavigate, onOpenScan }) {
+  const { t } = useLanguage();
   // Scroll to top upon load or anchor target
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -76,13 +78,13 @@ export default function FeaturesPage({ onNavigate, onOpenScan }) {
           <section className="pt-6 pb-2 text-center space-y-3 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/90 border border-emerald-200 text-[#1b5e20] text-xs font-bold uppercase tracking-wider shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-[#257038]" />
-              <span>Core Agricultural Intelligence Suite</span>
+              <span>{t('fp_suite')}</span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#11291c] font-display uppercase tracking-tight drop-shadow-2xs">
               Kisan Rakshak Platform Features
             </h1>
             <p className="text-sm sm:text-base text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
-              Precision agriculture tools in series: AI multimodal disease scanning, 7-day weather risk modeling, and bright-mode UP regional disease radar.
+              {t('fp_subtitle')}
             </p>
           </section>
 

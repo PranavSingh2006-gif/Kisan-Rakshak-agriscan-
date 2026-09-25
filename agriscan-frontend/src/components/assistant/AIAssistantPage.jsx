@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Send, Sparkles, User, Bot, Loader2, CheckCircle2 } from 'lucide-react';
 import Footer from '../Footer';
 

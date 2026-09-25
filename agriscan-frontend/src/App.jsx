@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import HowItWorksCard from './components/HowItWorksCard';
@@ -58,6 +59,7 @@ export default function App() {
   const handleSelectBenefit = () => handleOpenScan(null);
 
   return (
+    <LanguageProvider>
     <div className="min-h-screen bg-[#fcfdfa] text-gray-900 flex flex-col font-sans selection:bg-green-100 selection:text-green-900">
       <Navbar onOpenScan={handleOpenScan} onNavigate={navigateTo} currentPath={currentPath} />
       <main className="flex-1 flex flex-col">
@@ -85,5 +87,6 @@ export default function App() {
       </main>
       {scanModalOpen && <ScanModal isOpen={scanModalOpen} onClose={handleCloseScan} initialPlot={scanModalPlot} />}
     </div>
+    </LanguageProvider>
   );
 }
