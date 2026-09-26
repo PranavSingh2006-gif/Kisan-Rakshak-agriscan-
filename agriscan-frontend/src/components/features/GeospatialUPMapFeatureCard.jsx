@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   MapPin, AlertTriangle, Wind, ShieldAlert, Users, Radio, 
-  Send, Compass, Layers, CheckCircle, Search, Eye, Filter,
+  Send, Compass, Layers, Search, Eye, Filter,
   Maximize2, ZoomIn, Globe, Navigation
 } from 'lucide-react';
 import L from 'leaflet';
@@ -125,7 +125,6 @@ const BRIGHT_RADAR_TILE = {
 
 export default function GeospatialUPMapFeatureCard() {
   const [selectedHotspot, setSelectedHotspot] = useState(MH_DISTRICT_HOTSPOTS[0]);
-  const [alertSent, setAlertSent] = useState(false);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
   const [mapZoomMode, setMapZoomMode] = useState('MH'); // Focus Maharashtra region by default
 
@@ -412,11 +411,6 @@ export default function GeospatialUPMapFeatureCard() {
 
 
 
-  const handleBroadcastAlert = () => {
-    setAlertSent(true);
-    setTimeout(() => setAlertSent(false), 5000);
-  };
-
   return (
     <section id="surveillance" className="bg-white rounded-3xl p-6 sm:p-10 border border-green-200/90 shadow-xl shadow-green-950/5 transition-all">
       
@@ -625,23 +619,6 @@ export default function GeospatialUPMapFeatureCard() {
             </div>
           </div>
 
-          {/* One-Click Farmer Alert Broadcast Demo Button */}
-          <div className="pt-4 border-t border-gray-200">
-            {alertSent ? (
-              <div className="p-3.5 bg-emerald-100 border border-emerald-300 rounded-xl text-emerald-900 text-xs font-bold flex items-center gap-2 animate-fadeIn">
-                <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0" />
-                <span>Emergency Broadcast Dispatched to {selectedHotspot.farmsReported} registered farmers in {selectedHotspot.district}!</span>
-              </div>
-            ) : (
-              <button
-                onClick={handleBroadcastAlert}
-                className="w-full py-3 px-4 rounded-xl bg-[#257038] hover:bg-[#1e5c2e] text-white font-bold text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-98 cursor-pointer"
-              >
-                <Send className="w-4 h-4" />
-                <span>Broadcast Rapid WhatsApp / SMS Alert to {selectedHotspot.farmsReported} Farmers</span>
-              </button>
-            )}
-          </div>
 
         </div>
 
