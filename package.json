@@ -4,6 +4,8 @@
   "private": true,
   "description": "Kisan Rakshak / AgriScan Monorepo with separated Frontend and Backend",
   "scripts": {
+    "build": "npm run install:all && npm run build:frontend",
+    "start": "node agriscan-backend/server.js",
     "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "npm --prefix agriscan-frontend run dev",
     "dev:backend": "npm --prefix agriscan-backend run dev",

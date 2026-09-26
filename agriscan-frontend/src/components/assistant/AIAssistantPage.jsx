@@ -55,7 +55,7 @@ export default function AIAssistantPage({ onOpenScan, onNavigate }) {
     if (!textToSend) setAiInput('');
     setAiLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/chat-assistant', {
+      const res = await fetch('/api/chat-assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: query.trim() })

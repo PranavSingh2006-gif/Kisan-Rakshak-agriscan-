@@ -49,7 +49,7 @@ export default function FeaturesPage({ onNavigate, onOpenScan }) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700 hover:text-[#257038] bg-red-50 hover:bg-red-100 transition-all cursor-pointer whitespace-nowrap"
             >
               <MapPin className="w-3.5 h-3.5 text-red-600" />
-              <span>3. Maharashtra Disease Radar</span>
+              <span>3. UP Disease Radar</span>
             </button>
           </div>
 

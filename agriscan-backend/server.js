@@ -1,6 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.resolve(__dirname, '../agriscan-frontend/dist');
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
@@ -368,6 +374,19 @@ Your role:
   return res.json({
     reply: fallbackReply,
     modelUsed: 'KisanRakshak-Rule-Engine'
+  });
+});
+
+// Serve frontend static build if dist exists
+app.use(express.static(distPath));
+
+// Fallback for Single Page Application client-side routing (Express 5 compatible)
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(distPath, 'index.html'), (err) => {
+    if (err) next();
   });
 });
 
