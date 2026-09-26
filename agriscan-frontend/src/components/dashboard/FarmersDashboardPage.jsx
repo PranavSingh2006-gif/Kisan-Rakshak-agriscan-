@@ -24,7 +24,6 @@ import {
 import Footer from '../Footer';
 import ScanHistoryModal from './ScanHistoryModal';
 import { getAllPlotHistories, getPlotHistory } from '../../data/progressiveScanHistory';
-import { useLanguage } from '../../context/LanguageContext';
 
 // Initial crop data directly matching the user's reference image
 const INITIAL_CROPS = [
@@ -163,7 +162,6 @@ const INITIAL_IRRIGATION_SCHEDULE = [
 ];
 
 export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
-  const { t } = useLanguage();
   const [crops, setCrops] = useState(INITIAL_CROPS);
   const [irrigationSchedule, setIrrigationSchedule] = useState(INITIAL_IRRIGATION_SCHEDULE);
   const [activeTaskCrop, setActiveTaskCrop] = useState(null);
@@ -309,10 +307,10 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               onClick={() => onNavigate && onNavigate('/')} 
               className="hover:text-[#257038] cursor-pointer"
             >
-              {t('Home')}
+              Home
             </span>
             <span>/</span>
-            <span className="text-[#257038] font-bold">{t('Dashboard')}</span>
+            <span className="text-[#257038] font-bold">Farmers Dashboard</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -321,7 +319,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-300 hover:border-[#257038] hover:text-[#257038] bg-white text-xs font-bold text-gray-700 shadow-2xs transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>{t('Add Plot')}</span>
+              <span>Add Plot</span>
             </button>
 
             <button
@@ -329,7 +327,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
             >
               <Camera className="w-3.5 h-3.5" />
-              <span>{t('Scan Crop')}</span>
+              <span>Scan Crop</span>
             </button>
           </div>
         </div>
@@ -345,8 +343,8 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t('Total Monitored Area')}</p>
-              <p className="text-xl font-extrabold text-[#11291c]">{totalAcreage} <span className="text-xs font-semibold text-gray-500">{t('Acres')}</span></p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Monitored Area</p>
+              <p className="text-xl font-extrabold text-[#11291c]">{totalAcreage} <span className="text-xs font-semibold text-gray-500">Acres</span></p>
             </div>
           </div>
 
@@ -355,8 +353,8 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               <Sprout className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t('Active Crop Plots')}</p>
-              <p className="text-xl font-extrabold text-[#11291c]">{crops.length} <span className="text-xs font-semibold text-gray-500">{t('Plots')}</span></p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Active Crop Plots</p>
+              <p className="text-xl font-extrabold text-[#11291c]">{crops.length} <span className="text-xs font-semibold text-gray-500">Plots</span></p>
             </div>
           </div>
 
@@ -365,8 +363,8 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               <Activity className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t('Farm Health Index')}</p>
-              <p className="text-xl font-extrabold text-[#257038]">{healthyCount} / {crops.length} <span className="text-xs font-semibold text-gray-500">{t('Healthy')}</span></p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Farm Health Index</p>
+              <p className="text-xl font-extrabold text-[#257038]">{healthyCount} / {crops.length} <span className="text-xs font-semibold text-gray-500">Healthy</span></p>
             </div>
           </div>
 
@@ -375,8 +373,8 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               <Droplets className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t('Smart Water Saved')}</p>
-              <p className="text-xl font-extrabold text-blue-900">14,200 <span className="text-xs font-semibold text-gray-500">{t('Litres')}</span></p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Smart Water Saved</p>
+              <p className="text-xl font-extrabold text-blue-900">14,200 <span className="text-xs font-semibold text-gray-500">Litres</span></p>
             </div>
           </div>
         </div>
@@ -390,13 +388,13 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span className="text-xs font-bold text-[#257038] uppercase tracking-wider block mb-1">
-                {t('FIELD MONITORING')}
+                FIELD MONITORING
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#11291c] tracking-tight">
-                {t('My Crops')}
+                My Crops
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                {t('Track crop stage, health, irrigation and upcoming actions.')}
+                Track crop stage, health, irrigation and upcoming actions.
               </p>
             </div>
 
@@ -407,7 +405,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#206332] hover:bg-[#184e27] text-white font-bold text-sm shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 <Camera className="w-4 h-4" />
-                <span>{t('Scan Crop')}</span>
+                <span>Scan Crop</span>
               </button>
             </div>
           </div>
@@ -473,7 +471,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
                     onClick={() => setActiveTaskCrop(crop)}
                     className="text-xs font-bold text-[#206332] hover:text-[#184e27] inline-flex items-center gap-1 group cursor-pointer"
                   >
-                    <span>{t('View field tasks')}</span>
+                    <span>View field tasks</span>
                     <span className="transition-transform group-hover:translate-x-0.5">→</span>
                   </button>
 
@@ -483,7 +481,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
                     className="text-[11px] font-bold text-gray-500 hover:text-[#206332] inline-flex items-center gap-1 bg-gray-50 hover:bg-emerald-50 px-2 py-1 rounded-lg border border-gray-200 hover:border-emerald-200 transition-colors cursor-pointer"
                     title="View Previous Scans & Health Diary"
                   >
-                    <span>{t('History')} ({getPlotScansCount(crop.id)})</span>
+                    <span>History ({getPlotScansCount(crop.id)})</span>
                     <span>📖</span>
                   </button>
                 </div>
@@ -498,8 +496,8 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               <div className="w-10 h-10 rounded-full bg-emerald-50 text-[#257038] flex items-center justify-center mb-2">
                 <Plus className="w-5 h-5" />
               </div>
-              <p className="text-sm font-bold text-gray-800">{t('Add New Crop Plot')}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{t('Monitor a new field or variety')}</p>
+              <p className="text-sm font-bold text-gray-800">Add New Crop Plot</p>
+              <p className="text-xs text-gray-400 mt-0.5">Monitor a new field or variety</p>
             </div>
           </div>
         </section>
@@ -513,13 +511,13 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span className="text-xs font-bold text-[#257038] uppercase tracking-wider block mb-1">
-                {t('WATER MANAGEMENT')}
+                WATER MANAGEMENT
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#11291c] tracking-tight">
-                {t('Smart Irrigation Planner')}
+                Smart Irrigation Planner
               </h2>
               <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                {t('db_irrigationDesc')}
+                Automated soil moisture monitoring, evapotranspiration rates, and weather-synchronized watering schedules.
               </p>
             </div>
 
@@ -532,7 +530,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-xs font-bold text-gray-700 shadow-2xs hover:bg-gray-50 transition-all cursor-pointer disabled:opacity-60"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingWater ? 'animate-spin text-[#257038]' : ''}`} />
-                <span>{isRefreshingWater ? t('Syncing...') || 'Syncing...' : t('Refresh') || 'Refresh'}</span>
+                <span>{isRefreshingWater ? 'Syncing...' : 'Refresh'}</span>
               </button>
             </div>
           </div>
@@ -540,7 +538,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
           {waterRefreshNotice && (
             <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>{t('db_telemetry')}</span>
+              <span>Telemetry refreshed: Soil moisture sensors updated across all 4 plots.</span>
             </div>
           )}
 
@@ -752,8 +750,8 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
           <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-extrabold text-gray-900">{t('db_addPlotTitle')}</h3>
-                <p className="text-xs text-gray-500">{t('Register a new acreage parcel to your dashboard') || 'Register a new acreage parcel to your dashboard'}</p>
+                <h3 className="text-xl font-extrabold text-gray-900">Add Crop Plot</h3>
+                <p className="text-xs text-gray-500">Register a new acreage parcel to your dashboard</p>
               </div>
               <button
                 onClick={() => setIsAddCropModalOpen(false)}
@@ -765,7 +763,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
 
             <form onSubmit={handleAddCropSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{t('db_cropName')}</label>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Crop Type</label>
                 <select
                   value={newCropName}
                   onChange={(e) => {
@@ -787,7 +785,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{t('db_fieldLocation')}</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Field / Parcel Name</label>
                   <input
                     type="text"
                     required
@@ -798,7 +796,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{t('db_acreage')}</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Acreage</label>
                   <input
                     type="number"
                     step="0.1"
@@ -812,7 +810,7 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{t('db_growthStage')}</label>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Current Growth Stage</label>
                 <select
                   value={newCropStage}
                   onChange={(e) => setNewCropStage(e.target.value)}
@@ -833,13 +831,13 @@ export default function FarmersDashboardPage({ onOpenScan, onNavigate }) {
                   onClick={() => setIsAddCropModalOpen(false)}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
-                  {t('db_cancel')}
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2.5 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-bold text-xs shadow-xs cursor-pointer"
                 >
-                  {t('db_savePlot')}
+                  Save Plot to Dashboard
                 </button>
               </div>
             </form>

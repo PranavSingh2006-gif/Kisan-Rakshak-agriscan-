@@ -32,7 +32,7 @@ export default function Navbar({ onOpenScan, onNavigate, currentPath = '/' }) {
   const handleHowItWorksClick = (e) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    if (!isHome) {
+    if (isFeatures || isAssistant) {
       if (onNavigate) onNavigate('/');
       setTimeout(() => {
         const el = document.getElementById('how-it-works');
