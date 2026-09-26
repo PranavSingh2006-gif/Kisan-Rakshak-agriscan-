@@ -7,111 +7,111 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const UP_DISTRICT_HOTSPOTS = [
+const MH_DISTRICT_HOTSPOTS = [
   {
-    id: 'kanpur-lucknow',
-    district: 'Kanpur Nagar & Lucknow',
-    region: 'Central UP Potato Belt',
-    lat: 26.8467,
-    lng: 80.9462,
-    disease: 'Potato Late Blight (पछेती झुलसा)',
-    pathogen: 'Phytophthora infestans',
+    id: 'pune-satara',
+    district: 'Pune & Satara',
+    region: 'Western Ghats Grape & Onion Belt',
+    lat: 18.5204,
+    lng: 73.8567,
+    disease: 'Grape Downy Mildew (द्राक्ष केवडा)',
+    pathogen: 'Plasmopara viticola',
     severity: 'Severe Outbreak',
     severityLevel: 3,
     statusColor: 'bg-red-500 text-white',
-    radiusMeters: 45000,
+    radiusMeters: 48000,
     circleColor: '#ef4444',
-    affectedHectares: '3,850 ha',
-    farmsReported: 1420,
-    windVector: 'East-Southeast @ 18 km/h',
-    windAngle: 110, // degrees
+    affectedHectares: '4,120 ha',
+    farmsReported: 1650,
+    windVector: 'West-Southwest @ 16 km/h',
+    windAngle: 250,
     quarantineLevel: 'High Quarantine Alert',
-    containmentAdvisory: 'Prohibit transport of uncertified seed tubers out of Kanpur/Farrukhabad belt. Apply systemic Dimethomorph 50% WP immediately.',
-    nearbyVulnerable: ['Unnao', 'Barabanki', 'Hardoi', 'Rae Bareli']
+    containmentAdvisory: 'Prohibit movement of infected grape cuttings from Pune/Satara to Nashik belt. Apply Metalaxyl-M + Mancozeb WP at 2.5g/L immediately. Destroy infected canopy.',
+    nearbyVulnerable: ['Solapur', 'Ahmednagar', 'Kolhapur', 'Sangli']
   },
   {
-    id: 'meerut-bareilly',
-    district: 'Meerut & Bareilly',
-    region: 'Western UP Wheat Belt',
-    lat: 28.9845,
-    lng: 77.7064,
-    disease: 'Wheat Yellow Stripe Rust (पीला रतुआ)',
-    pathogen: 'Puccinia striiformis',
+    id: 'nashik-nandurbar',
+    district: 'Nashik & Nandurbar',
+    region: 'North Maharashtra Onion & Tomato Zone',
+    lat: 19.9975,
+    lng: 73.7898,
+    disease: 'Onion Purple Blotch (कांदा जांभळे ठिपके)',
+    pathogen: 'Alternaria porri',
     severity: 'Severe Outbreak',
     severityLevel: 3,
     statusColor: 'bg-red-500 text-white',
-    radiusMeters: 55000,
+    radiusMeters: 52000,
     circleColor: '#ef4444',
-    affectedHectares: '2,920 ha',
-    farmsReported: 980,
-    windVector: 'Eastward @ 15 km/h',
-    windAngle: 90,
+    affectedHectares: '3,280 ha',
+    farmsReported: 1180,
+    windVector: 'South-East @ 14 km/h',
+    windAngle: 135,
     quarantineLevel: 'High Airborne Spore Drift',
-    containmentAdvisory: 'Airborne urediniospores travelling eastward across the Rohilkhand plains. Mandatory preventive Propiconazole 25% EC barrier spraying.',
-    nearbyVulnerable: ['Moradabad', 'Rampur', 'Budaun', 'Pilibhit']
+    containmentAdvisory: 'Airborne Alternaria conidia spreading southward across Nashik plateau. Mandatory Iprodione 50% WP barrier spraying. Avoid overhead irrigation.',
+    nearbyVulnerable: ['Dhule', 'Jalgaon', 'Ahmednagar', 'Malegaon']
   },
   {
-    id: 'varanasi-mirzapur',
-    district: 'Varanasi & Mirzapur',
-    region: 'Eastern UP Vegetable Belt',
-    lat: 25.3176,
-    lng: 82.9739,
-    disease: 'Tomato Yellow Leaf Curl (पर्ण कुंचन)',
-    pathogen: 'Begomovirus / Whitefly Vector',
+    id: 'amravati-nagpur',
+    district: 'Amravati & Nagpur',
+    region: 'Vidarbha Cotton & Orange Belt',
+    lat: 20.9320,
+    lng: 77.7523,
+    disease: 'Cotton Pink Bollworm (गुलाबी बोंड अळी)',
+    pathogen: 'Pectinophora gossypiella',
     severity: 'Moderate Risk',
     severityLevel: 2,
     statusColor: 'bg-amber-500 text-white',
-    radiusMeters: 38000,
+    radiusMeters: 60000,
     circleColor: '#f59e0b',
-    affectedHectares: '1,340 ha',
-    farmsReported: 520,
-    windVector: 'South-Southeast @ 9 km/h',
-    windAngle: 150,
-    quarantineLevel: 'Active Vector Surveillance',
-    containmentAdvisory: 'Install yellow sticky traps (15 traps/acre) and spray Imidacloprid 17.8% SL to suppress Bemisia tabaci vector population.',
-    nearbyVulnerable: ['Chandauli', 'Ghazipur', 'Jaunpur', 'Bhadohi']
+    affectedHectares: '5,640 ha',
+    farmsReported: 2100,
+    windVector: 'North-West @ 11 km/h',
+    windAngle: 315,
+    quarantineLevel: 'Active Pest Surveillance',
+    containmentAdvisory: 'Install pheromone traps at 5/acre density. Spray Emamectin Benzoate 5% SG if larval count exceeds threshold. Destroy cotton stubble post-harvest.',
+    nearbyVulnerable: ['Wardha', 'Yavatmal', 'Buldhana', 'Akola']
   },
   {
-    id: 'gorakhpur-basti',
-    district: 'Gorakhpur & Basti',
-    region: 'Terai Sub-Himalayan Paddy Zone',
-    lat: 26.7606,
-    lng: 83.3732,
-    disease: 'Bacterial Leaf Blight of Rice (जीवाणु झुलसा)',
-    pathogen: 'Xanthomonas oryzae pv. oryzae',
+    id: 'aurangabad-latur',
+    district: 'Chhatrapati Sambhajinagar & Latur',
+    region: 'Marathwada Soybean & Sugarcane Zone',
+    lat: 19.8762,
+    lng: 75.3433,
+    disease: 'Soybean Yellow Mosaic Virus (सोयाबीन पिवळा विषाणू)',
+    pathogen: 'Bean Yellow Mosaic Potyvirus / Whitefly',
     severity: 'Moderate Risk',
     severityLevel: 2,
     statusColor: 'bg-amber-500 text-white',
-    radiusMeters: 42000,
+    radiusMeters: 44000,
     circleColor: '#f59e0b',
-    affectedHectares: '1,680 ha',
-    farmsReported: 640,
-    windVector: 'North-East @ 11 km/h',
-    windAngle: 45,
-    quarantineLevel: 'Waterway Contagion Watch',
-    containmentAdvisory: 'Avoid nitrogen top-dressing during active rain. Drain stagnant standing water between infected paddy bunds.',
-    nearbyVulnerable: ['Deoria', 'Kushinagar', 'Maharajganj', 'Siddharthnagar']
+    affectedHectares: '2,890 ha',
+    farmsReported: 980,
+    windVector: 'South-West @ 9 km/h',
+    windAngle: 225,
+    quarantineLevel: 'Vector Surveillance Zone',
+    containmentAdvisory: 'Remove and burn symptomatic soybean plants. Deploy yellow sticky traps. Apply Thiamethoxam 25% WG to control Bemisia tabaci whitefly vector.',
+    nearbyVulnerable: ['Osmanabad', 'Beed', 'Nanded', 'Hingoli']
   },
   {
-    id: 'agra-mathura',
-    district: 'Agra & Mathura',
-    region: 'Braj Mustard & Oilseed Zone',
-    lat: 27.1767,
-    lng: 78.0081,
-    disease: 'Mustard White Rust & Downy Mildew',
-    pathogen: 'Albugo candida',
+    id: 'kolhapur-sangli',
+    district: 'Kolhapur & Sangli',
+    region: 'Southern Maharashtra Sugarcane Belt',
+    lat: 16.7050,
+    lng: 74.2433,
+    disease: 'Sugarcane Red Rot (ऊस लाल कूज)',
+    pathogen: 'Colletotrichum falcatum',
     severity: 'Monitored / Low',
     severityLevel: 1,
     statusColor: 'bg-emerald-600 text-white',
-    radiusMeters: 30000,
+    radiusMeters: 35000,
     circleColor: '#10b981',
-    affectedHectares: '420 ha',
-    farmsReported: 130,
-    windVector: 'North-East @ 8 km/h',
-    windAngle: 50,
-    quarantineLevel: 'Controlled / Low Threat',
-    containmentAdvisory: 'Isolated white staghead deformities detected. Routine Mancozeb foliar spray at 15-day interval recommended.',
-    nearbyVulnerable: ['Firozabad', 'Aligarh', 'Hathras']
+    affectedHectares: '680 ha',
+    farmsReported: 210,
+    windVector: 'South-West @ 7 km/h',
+    windAngle: 220,
+    quarantineLevel: 'Controlled / Early Detection',
+    containmentAdvisory: 'Use disease-free certified seed ratoons. Hot water treatment at 52°C for 30 min before planting. Avoid water logging in affected plots.',
+    nearbyVulnerable: ['Belgaum (KA)', 'Solapur', 'Satara', 'Ratnagiri']
   }
 ];
 
@@ -124,17 +124,17 @@ const BRIGHT_RADAR_TILE = {
 };
 
 export default function GeospatialUPMapFeatureCard() {
-  const [selectedHotspot, setSelectedHotspot] = useState(UP_DISTRICT_HOTSPOTS[0]);
+  const [selectedHotspot, setSelectedHotspot] = useState(MH_DISTRICT_HOTSPOTS[0]);
   const [alertSent, setAlertSent] = useState(false);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
-  const [mapZoomMode, setMapZoomMode] = useState('UP'); // Focus UP region by default
+  const [mapZoomMode, setMapZoomMode] = useState('MH'); // Focus Maharashtra region by default
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const tileLayerRef = useRef(null);
   const layerGroupRef = useRef(null);
 
-  const filteredHotspots = UP_DISTRICT_HOTSPOTS.filter(h => {
+  const filteredHotspots = MH_DISTRICT_HOTSPOTS.filter(h => {
     if (filterSeverity === 'ALL') return true;
     if (filterSeverity === 'SEVERE') return h.severityLevel === 3;
     if (filterSeverity === 'MODERATE') return h.severityLevel === 2;
@@ -149,10 +149,10 @@ export default function GeospatialUPMapFeatureCard() {
     }
   };
 
-  const handleZoomToUP = () => {
-    setMapZoomMode('UP');
+  const handleZoomToMH = () => {
+    setMapZoomMode('MH');
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.setView([26.85, 80.95], 6, { animate: true });
+      mapInstanceRef.current.setView([19.75, 75.71], 7, { animate: true });
     }
   };
 
@@ -166,10 +166,10 @@ export default function GeospatialUPMapFeatureCard() {
     }
 
     if (!mapInstanceRef.current) {
-      // Create map centered on Uttar Pradesh by default
+      // Create map centered on Maharashtra by default
       const map = L.map(mapContainerRef.current, {
-        center: [26.85, 80.95],
-        zoom: 6,
+        center: [19.75, 75.71],
+        zoom: 7,
         minZoom: 4,
         maxZoom: 16,
         scrollWheelZoom: true,
@@ -226,7 +226,7 @@ export default function GeospatialUPMapFeatureCard() {
       try {
         L.geoJSON(INDIA_STATES_GEOJSON, {
           style: (feature) => {
-            const isUP = feature.properties?.name === 'Uttar Pradesh';
+            const isUP = feature.properties?.name === 'Maharashtra';
             if (isUP) {
               return {
                 color: '#15803d',     // Rich Emerald Green border for UP
@@ -248,7 +248,7 @@ export default function GeospatialUPMapFeatureCard() {
           },
           onEachFeature: (feature, layer) => {
             const stateName = feature.properties?.name || 'State';
-            const isUP = stateName === 'Uttar Pradesh';
+            const isUP = stateName === 'Maharashtra';
 
             if (!isUP) {
               layer.bindTooltip(
@@ -298,16 +298,16 @@ export default function GeospatialUPMapFeatureCard() {
         icon: L.divIcon({
           html: `
             <div class="state-up-highlight-badge flex items-center gap-1.5 whitespace-nowrap cursor-pointer shadow-lg">
-              <span>🌾 UTTAR PRADESH</span>
+              <span>🌾 MAHARASHTRA</span>
               <span class="text-[9px] bg-white text-green-800 px-1.5 py-0.5 rounded-full font-bold">Surveillance Zone</span>
             </div>
           `,
-          className: 'up-badge-container',
+          className: 'mh-badge-container',
           iconSize: [180, 30],
           iconAnchor: [90, 15]
         })
       });
-      upBadge.on('click', () => handleZoomToUP());
+      upBadge.on('click', () => handleZoomToMH());
       upBadge.addTo(layerGroup);
 
       // Centered visible labels for all major Indian states across the country
@@ -429,10 +429,10 @@ export default function GeospatialUPMapFeatureCard() {
             <span>Feature 03 • Geographic Epidemic Surveillance</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#11291c] font-display">
-            Geospatial Surveillance Hotspot Map (India / UP Region)
+            Geospatial Surveillance Hotspot Map (India / Maharashtra Region)
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Actual interactive map of India with live district contagion radius radar, spore drift trajectories, and farmer alerts in Uttar Pradesh.
+            Actual interactive map of India with live district contagion radius radar, spore drift trajectories, and farmer alerts in Maharashtra.
           </p>
         </div>
 
@@ -463,13 +463,13 @@ export default function GeospatialUPMapFeatureCard() {
                 <span>All India Map</span>
               </button>
               <button
-                onClick={handleZoomToUP}
+                onClick={handleZoomToMH}
                 className={`px-3 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1.5 transition-all ${
-                  mapZoomMode === 'UP' ? 'bg-[#257038] text-white shadow-xs' : 'text-gray-600 hover:text-green-800'
+                  mapZoomMode === 'MH' ? 'bg-[#257038] text-white shadow-xs' : 'text-gray-600 hover:text-green-800'
                 }`}
               >
                 <Navigation className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Focus UP Region (Highlighted)</span>
+                <span>Focus Maharashtra (Highlighted)</span>
               </button>
             </div>
 
