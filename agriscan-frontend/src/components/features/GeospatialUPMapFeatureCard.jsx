@@ -141,7 +141,7 @@ export default function GeospatialUPMapFeatureCard() {
     return true;
   });
 
-  // Camera Zoom Handlers (hoisted for use in effects and UI)
+  // Camera Zoom Handlers
   const handleZoomToIndia = () => {
     setMapZoomMode('INDIA');
     if (mapInstanceRef.current) {
@@ -221,24 +221,24 @@ export default function GeospatialUPMapFeatureCard() {
     const layerGroup = layerGroupRef.current;
     layerGroup.clearLayers();
 
-    // 1. Render All 36 Indian States from embedded GeoJSON with UP highlighted
+    // 1. Render All 36 Indian States from embedded GeoJSON with Maharashtra highlighted
     if (INDIA_STATES_GEOJSON && INDIA_STATES_GEOJSON.features) {
       try {
         L.geoJSON(INDIA_STATES_GEOJSON, {
           style: (feature) => {
-            const isUP = feature.properties?.name === 'Maharashtra';
-            if (isUP) {
+            const isMH = feature.properties?.name === 'Maharashtra';
+            if (isMH) {
               return {
-                color: '#15803d',     // Rich Emerald Green border for UP
-                weight: 3.8,          // Prominently highlighted stroke
+                color: '#15803d',
+                weight: 3.8,
                 opacity: 1,
-                fillColor: '#22c55e', // Soft green highlighted fill
+                fillColor: '#22c55e',
                 fillOpacity: 0.22,
                 dashArray: 'none'
               };
             }
             return {
-              color: '#475569', // Clear state boundary line
+              color: '#475569',
               weight: 1.4,
               opacity: 0.75,
               fillColor: '#64748b',
@@ -248,9 +248,9 @@ export default function GeospatialUPMapFeatureCard() {
           },
           onEachFeature: (feature, layer) => {
             const stateName = feature.properties?.name || 'State';
-            const isUP = stateName === 'Maharashtra';
+            const isMH = stateName === 'Maharashtra';
 
-            if (!isUP) {
+            if (!isMH) {
               layer.bindTooltip(
                 `<div class="font-bold text-xs">🇮🇳 ${stateName}</div><div class="text-[10px] text-gray-500">Indian State • Click to inspect</div>`,
                 {
@@ -262,17 +262,17 @@ export default function GeospatialUPMapFeatureCard() {
 
             layer.on({
               mouseover: (e) => {
-                if (!isUP) {
+                if (!isMH) {
                   e.target.setStyle({
                     weight: 2.4,
-                    color: '#16a34a', // Emerald green highlight on hover
+                    color: '#16a34a',
                     fillOpacity: 0.16,
                     fillColor: '#86efac'
                   });
                 }
               },
               mouseout: (e) => {
-                if (!isUP) {
+                if (!isMH) {
                   e.target.setStyle({
                     color: '#475569',
                     weight: 1.4,
@@ -282,8 +282,8 @@ export default function GeospatialUPMapFeatureCard() {
                 }
               },
               click: () => {
-                if (isUP) {
-                  handleZoomToUP();
+                if (isMH) {
+                  handleZoomToMH();
                 }
               }
             });
@@ -293,8 +293,8 @@ export default function GeospatialUPMapFeatureCard() {
         console.error('Error rendering states GeoJSON:', err);
       }
 
-      // Dedicated prominent badge for Uttar Pradesh at its geographic center
-      const upBadge = L.marker([26.85, 80.95], {
+      // Dedicated prominent badge for Maharashtra at its geographic center
+      const mhBadge = L.marker([19.40, 75.80], {
         icon: L.divIcon({
           html: `
             <div class="state-up-highlight-badge flex items-center gap-1.5 whitespace-nowrap cursor-pointer shadow-lg">
@@ -303,18 +303,17 @@ export default function GeospatialUPMapFeatureCard() {
             </div>
           `,
           className: 'mh-badge-container',
-          iconSize: [180, 30],
-          iconAnchor: [90, 15]
+          iconSize: [200, 30],
+          iconAnchor: [100, 15]
         })
       });
-      upBadge.on('click', () => handleZoomToMH());
-      upBadge.addTo(layerGroup);
+      mhBadge.on('click', () => handleZoomToMH());
+      mhBadge.addTo(layerGroup);
 
       // Centered visible labels for all major Indian states across the country
       const MAJOR_STATE_LABELS = [
         { name: 'Rajasthan', lat: 26.20, lng: 73.80 },
         { name: 'Madhya Pradesh', lat: 23.40, lng: 77.80 },
-        { name: 'Maharashtra', lat: 19.40, lng: 75.80 },
         { name: 'Gujarat', lat: 22.40, lng: 71.20 },
         { name: 'Bihar', lat: 25.80, lng: 85.60 },
         { name: 'Punjab', lat: 30.90, lng: 75.40 },
@@ -329,8 +328,8 @@ export default function GeospatialUPMapFeatureCard() {
         { name: 'Assam', lat: 26.20, lng: 92.60 },
         { name: 'Chhattisgarh', lat: 21.20, lng: 81.80 },
         { name: 'Jharkhand', lat: 23.60, lng: 85.60 },
-        { name: 'Himachal', lat: 31.80, lng: 77.20 },
         { name: 'Uttarakhand', lat: 30.10, lng: 79.10 },
+        { name: 'Uttar Pradesh', lat: 27.00, lng: 80.50 },
         { name: 'J&K', lat: 33.60, lng: 75.80 }
       ];
 
@@ -348,8 +347,8 @@ export default function GeospatialUPMapFeatureCard() {
       });
 
     } else {
-      // Fallback: highlight UP Precise Boundary
-      const upPolygon = L.polygon(UP_PRECISE_BOUNDARY, {
+      // Fallback: highlight Maharashtra Boundary
+      const mhPolygon = L.polygon(UP_PRECISE_BOUNDARY, {
         color: '#15803d',
         weight: 3.8,
         opacity: 1,
@@ -357,7 +356,7 @@ export default function GeospatialUPMapFeatureCard() {
         fillOpacity: 0.22
       }).addTo(layerGroup);
 
-      upPolygon.bindTooltip('🌾 <b>Uttar Pradesh (UP)</b><br/><span style="color:#15803d; font-weight:bold;">Primary Surveillance Zone</span>', {
+      mhPolygon.bindTooltip('🌾 <b>Maharashtra (MH)</b><br/><span style="color:#15803d; font-weight:bold;">Primary Surveillance Zone</span>', {
         permanent: true,
         direction: 'center',
         className: 'state-up-highlight-badge'
@@ -445,13 +444,13 @@ export default function GeospatialUPMapFeatureCard() {
       {/* Main Content Grid: Map on Left (7 cols), District Telemetry on Right (5 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8 items-start">
         
-        {/* Left Column: Actual Geographic Map of India / UP (7 cols) */}
+        {/* Left Column: Actual Geographic Map of India / Maharashtra (7 cols) */}
         <div className="lg:col-span-7 bg-white rounded-2xl p-4 sm:p-5 text-gray-800 shadow-lg relative overflow-hidden border border-green-200/90">
           
           {/* Map Top Bar Controls */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3 z-10 relative">
             
-            {/* Zoom Toggles: Entire India vs UP Region */}
+            {/* Zoom Toggles: Entire India vs Maharashtra Region */}
             <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-xl border border-gray-200 text-xs">
               <button
                 onClick={handleZoomToIndia}
@@ -515,7 +514,7 @@ export default function GeospatialUPMapFeatureCard() {
             {/* Overlay Guide Card */}
             <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-md border border-emerald-200 px-3 py-1.5 rounded-xl text-[10px] text-emerald-800 font-mono flex items-center gap-2 pointer-events-none shadow-md">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <span>LIVE GIS SURVEILLANCE • INDIA</span>
+              <span>LIVE GIS SURVEILLANCE • MAHARASHTRA</span>
             </div>
 
             {/* Interactive Control Helper Badge */}
