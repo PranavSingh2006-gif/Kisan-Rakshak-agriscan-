@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   X,
   Calendar,
@@ -13,9 +13,28 @@ import {
 } from 'lucide-react';
 
 export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenFollowUpScan }) {
+  // Local copy of scans so deletions only affect the modal view
+  const [localScans, setLocalScans] = useState(null);
+
   if (!isOpen || !plotHistory) return null;
 
-  const scans = plotHistory.scans || [];
+  // Initialise localScans from plotHistory on first render of this open session
+  const rawScans = plotHistory.scans || [];
+  const scans = localScans ?? rawScans;
+
+  // Remove a scan by index and renumber the rest sequentially
+  const handleRemoveScan = (indexToRemove) => {
+    const updated = scans
+      .filter((_, i) => i !== indexToRemove)
+      .map((scan, i) => ({ ...scan, scanNumber: i + 1 }));
+    setLocalScans(updated);
+  };
+
+  // Reset local state when modal closes
+  const handleClose = () => {
+    setLocalScans(null);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-fadeIn">
@@ -46,7 +65,7 @@ export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenF
             <button
               type="button"
               onClick={() => {
-                onClose();
+                handleClose();
                 if (onOpenFollowUpScan) onOpenFollowUpScan(plotHistory);
               }}
               className="px-3.5 py-2 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
@@ -56,7 +75,7 @@ export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenF
             </button>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -80,10 +99,20 @@ export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenF
               return (
                 <div
                   key={scan.id || scan.scanNumber}
-                  className="bg-white rounded-2xl border border-gray-200 shadow-2xs hover:shadow-xs transition-shadow overflow-hidden"
+                  className="relative bg-white rounded-2xl border border-gray-200 shadow-2xs hover:shadow-xs transition-shadow overflow-hidden"
                 >
+                  {/* ✕ Delete button — top-right corner */}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveScan(index)}
+                    title="Remove this scan record"
+                    className="absolute top-2.5 right-2.5 z-10 w-6 h-6 rounded-full bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-400 flex items-center justify-center text-red-400 hover:text-red-600 transition-all cursor-pointer shadow-xs"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+
                   {/* Record Card Header Bar */}
-                  <div className="px-4 sm:px-5 py-3 bg-[#f8faf7] border-b border-gray-100 flex flex-wrap items-center justify-between gap-2">
+                  <div className="px-4 sm:px-5 py-3 bg-[#f8faf7] border-b border-gray-100 flex flex-wrap items-center justify-between gap-2 pr-10">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="px-2.5 py-0.5 rounded-md text-xs font-black bg-[#257038] text-white">
                         Scan #{scan.scanNumber}
@@ -243,7 +272,7 @@ export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenF
         <div className="p-4 border-t border-gray-100 bg-[#fbfdfa] flex items-center justify-end shrink-0">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="px-6 py-2 rounded-xl bg-[#206332] hover:bg-[#184e27] text-white font-bold text-xs shadow-xs cursor-pointer transition-all"
           >
             Close History
