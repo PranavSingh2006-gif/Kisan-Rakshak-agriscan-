@@ -546,9 +546,8 @@ export function LanguageProvider({ children }) {
     }
     return keyOrText;
   };
-
   // Translation is handled exclusively via the t() function in JSX.
-  // DO NOT add DOM-walking or MutationObserver here — it causes infinite loops.
+  // DO NOT add DOM-walking or MutationObserver here - it causes infinite loops.
 
   return (
     <LanguageContext.Provider value={{ lang, setLang: handleSetLang, t }}>
