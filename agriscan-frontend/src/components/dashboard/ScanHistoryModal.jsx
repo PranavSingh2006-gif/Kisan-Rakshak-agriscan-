@@ -13,16 +13,13 @@ import {
 } from 'lucide-react';
 
 export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenFollowUpScan }) {
-  // Local copy of scans so deletions only affect the modal view
-  const [localScans, setLocalScans] = useState(null);
+  const [localScans, setLocalScans] = React.useState(null);
 
   if (!isOpen || !plotHistory) return null;
 
-  // Initialise localScans from plotHistory on first render of this open session
   const rawScans = plotHistory.scans || [];
   const scans = localScans ?? rawScans;
 
-  // Remove a scan by index and renumber the rest sequentially
   const handleRemoveScan = (indexToRemove) => {
     const updated = scans
       .filter((_, i) => i !== indexToRemove)
@@ -30,7 +27,6 @@ export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenF
     setLocalScans(updated);
   };
 
-  // Reset local state when modal closes
   const handleClose = () => {
     setLocalScans(null);
     onClose();
@@ -101,7 +97,7 @@ export default function ScanHistoryModal({ plotHistory, isOpen, onClose, onOpenF
                   key={scan.id || scan.scanNumber}
                   className="relative bg-white rounded-2xl border border-gray-200 shadow-2xs hover:shadow-xs transition-shadow overflow-hidden"
                 >
-                  {/* ✕ Delete button — top-right corner */}
+                  {/* Delete X button */}
                   <button
                     type="button"
                     onClick={() => handleRemoveScan(index)}
